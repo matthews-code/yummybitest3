@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "postgresql"
     // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
     // Further reading:
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
@@ -33,12 +33,12 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String? // @db.Text
+    id_token          String? @db.Text
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -70,4 +70,45 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model item_order {
+  order_uid String @db.Uuid
+  item_uid  String @db.Uuid
+  quantity  BigInt
+  items     items  @relation(fields: [item_uid], references: [item_uid], onDelete: NoAction, onUpdate: NoAction)
+  orders    orders @relation(fields: [order_uid], references: [order_uid], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([order_uid, item_uid])
+}
+
+model items {
+  item_uid   String       @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
+  name       String
+  price      Decimal      @db.Decimal(15, 3)
+  inventory  Decimal      @db.Decimal(15, 0)
+  item_order item_order[]
+}
+
+model orders {
+  order_uid         String       @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
+  date              DateTime     @db.Timestamp(6)
+  amount_due        Decimal      @db.Decimal(15, 3)
+  payment_status    String?
+  payment_mode      String?
+  payment_amount    Decimal?     @db.Decimal(15, 3)
+  payment_recipient String?
+  note              String?
+  user_uid          String?      @db.Uuid
+  item_order        item_order[]
+  users             users?       @relation(fields: [user_uid], references: [user_uid], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  user_uid    String   @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
+  first_name  String
+  last_name   String?
+  contact_num String   @db.Char(11) @unique
+  address     String?
+  orders      orders[]
 }
