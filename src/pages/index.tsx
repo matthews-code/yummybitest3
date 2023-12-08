@@ -1,7 +1,5 @@
-import { signIn, signOut, useSession } from "next-auth/react";
-import { Html } from "next/document";
+// import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import Header from "~/components/Header";
 import Body from "~/components/Body";
 
