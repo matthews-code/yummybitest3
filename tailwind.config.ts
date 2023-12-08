@@ -4,11 +4,10 @@ import { fontFamily } from "tailwindcss/defaultTheme";
 export default {
   content: ["./src/**/*.tsx"],
   theme: {
-    extend: {
-      fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
-      },
-    },
+    extend: {},
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography"), require("daisyui")],
+  daisyui: {
+    themes: ["bumblebee"],
+  },
 } satisfies Config;

@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.lightest-border {
+  @apply border-2 border-solid border-sky-200;
+}
+.light-border {
+  @apply border-2 border-solid border-sky-400;
+}
+.medium-border {
+  @apply border-2 border-solid border-sky-600;
+}
+.dark-border {
+  @apply border-2 border-solid border-sky-800;
+}
