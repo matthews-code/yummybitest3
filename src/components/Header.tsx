@@ -1,38 +1,72 @@
 import React from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 
-const Header = () => {
+interface HeaderProps {
+  setPage: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const Header: React.FC<HeaderProps> = ({ setPage }) => {
   const { data: sessionData } = useSession();
+
+  const handleClick = () => {
+    const elem = document.activeElement as HTMLElement;
+    if (elem) {
+      elem?.blur();
+    }
+  };
 
   return (
     <div className="navbar bg-primary text-primary-content">
-      <div className="flex-1 pl-5 text-3xl font-bold">
-        {sessionData ? `Yummy Bites Dashboard` : ""}
+      <div className="medium-border flex-1 pl-5 text-3xl font-bold">
+        {sessionData ? (
+          <p onClick={() => setPage("orders")} className="cursor-pointer">
+            Yummy Bites Dashboard
+          </p>
+        ) : (
+          ""
+        )}
       </div>
       <div className="flex-none gap-2">
-        <div className="dropdown dropdown-end">
-          {sessionData?.user ? (
-            <label
+        {sessionData?.user ? (
+          <div className="dropdown dropdown-end">
+            <div
               tabIndex={0}
-              className="avatar btn btn-circle btn-ghost"
-              onClick={() => void signOut()}
+              role="button"
+              className="btn btn-circle btn-ghost"
             >
-              <div className="w-10 rounded-full">
-                <img
-                  src={sessionData?.user?.image ?? ""}
-                  alt={sessionData?.user?.name ?? ""}
-                />
-              </div>
-            </label>
-          ) : (
-            <button
-              className="btn btn-ghost rounded-btn"
-              onClick={() => void signIn()}
+              <img
+                className="w-10 rounded-full"
+                src={sessionData?.user?.image ?? ""}
+                alt={sessionData?.user?.name ?? ""}
+              />
+            </div>
+            <ul
+              tabIndex={0}
+              onClick={handleClick}
+              className="menu dropdown-content z-[1] mt-2 w-52 rounded-box bg-base-100 p-2 shadow"
             >
-              Sign in
-            </button>
-          )}
-        </div>
+              <li tabIndex={0}>
+                <p onClick={() => setPage("orders")}>Orders</p>
+              </li>
+              <li tabIndex={0}>
+                <p onClick={() => setPage("users")}>Users</p>
+              </li>
+              <li tabIndex={0}>
+                <p onClick={() => setPage("items")}>Items</p>
+              </li>
+              <li tabIndex={0}>
+                <p onClick={() => void signOut()}>Log Out</p>
+              </li>
+            </ul>
+          </div>
+        ) : (
+          <button
+            className="btn btn-ghost rounded-btn"
+            onClick={() => void signIn()}
+          >
+            Sign in
+          </button>
+        )}
       </div>
     </div>
   );

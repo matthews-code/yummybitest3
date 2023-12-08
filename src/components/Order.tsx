@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import dayjs, { Dayjs } from "dayjs";
 
-const Body = () => {
+const Order = () => {
   const [date, setDate] = useState(Date());
 
   return (
@@ -60,4 +60,4 @@ const Body = () => {
   );
 };
 
-export default Body;
+export default Order;
