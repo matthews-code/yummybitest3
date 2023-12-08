@@ -7,22 +7,19 @@ const Order = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="dark-border h-[calc(100vh-66px)] w-4/5 p-12">
-        <div className="medium-border flex justify-between">
-          <div>search</div>
-          <div className="light-border">{typeof date}</div>
-          <div>
-            <MobileDatePicker
-              closeOnSelect={true}
-              value={dayjs(date)}
-              onChange={(value: Dayjs | null) => {
-                console.log(value?.toDate());
-              }}
-            />
-          </div>
+      <div className="dark-border flex h-[calc(100vh-66px)] w-4/5 flex-col gap-4 p-12">
+        <div className="light-border flex justify-center">
+          <MobileDatePicker
+            className="font-bold"
+            closeOnSelect={true}
+            value={dayjs(date)}
+            onChange={(value: Dayjs | null) => {
+              console.log(value?.toDate());
+            }}
+          />
         </div>
-        <div className="light-border overflow-x-auto">
-          <table className="table">
+        <div className="overflow-x-auto">
+          <table className="medium-border table">
             <thead>
               <tr>
                 <th></th>

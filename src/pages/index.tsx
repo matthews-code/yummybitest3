@@ -5,12 +5,16 @@ import Order from "~/components/Order";
 import Users from "~/components/Users";
 import Items from "~/components/Items";
 
+import { useSession } from "next-auth/react";
+
 import { api } from "~/utils/api";
 import { useState } from "react";
 
 export default function Home() {
-  // const hello = api.post.hello.useQuery({ text: "from tRPC" });
-  const [page, setPage] = useState<string>("order");
+  const { data: sessionData } = useSession();
+  const hello = api.post.hello.useQuery({ text: "from tRPC" });
+
+  const [page, setPage] = useState<string>("orders");
 
   return (
     <>
@@ -24,10 +28,9 @@ export default function Home() {
       </Head>
       <main>
         <Header setPage={setPage}></Header>
-        {page === "orders" && <Order></Order>}
-        {/* <Order></Order> */}
-        {page === "users" && <Users></Users>}
-        {page === "items" && <Items></Items>}
+        {sessionData && page === "orders" && <Order></Order>}
+        {sessionData && page === "users" && <Users></Users>}
+        {sessionData && page === "items" && <Items></Items>}
       </main>
     </>
   );
