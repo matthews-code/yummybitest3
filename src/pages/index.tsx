@@ -9,6 +9,18 @@ import { useSession } from "next-auth/react";
 
 import { api } from "~/utils/api";
 import { useState } from "react";
+import { GetServerSideProps } from "next";
+import { withAuth } from "~/utils/auth";
+
+export const getServerSideProps: GetServerSideProps = withAuth(async () => {
+  // Your usual getServerSideProps logic
+
+  return {
+    props: {
+      // Your props here
+    },
+  };
+});
 
 export default function Home() {
   const { data: sessionData } = useSession();

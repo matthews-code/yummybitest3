@@ -15,6 +15,8 @@ const Header: React.FC<HeaderProps> = ({ setPage }) => {
     }
   };
 
+  // console.log(sessionData?.user);
+
   return (
     <div className="navbar bg-primary text-primary-content">
       <div className="flex-1 pl-5 text-3xl font-bold">
@@ -43,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ setPage }) => {
             <ul
               tabIndex={0}
               onClick={handleClick}
-              className="menu dropdown-content z-[1] mt-2 w-52 rounded-box bg-base-100 p-2 shadow-md"
+              className="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow-md"
             >
               <li tabIndex={0}>
                 <p onClick={() => setPage("orders")}>Orders</p>

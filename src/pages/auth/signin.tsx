@@ -5,6 +5,7 @@ import type {
 import { getProviders, signIn } from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../server/auth";
+import Image from "next/image";
 
 export default function SignIn({
   providers,
@@ -12,10 +13,26 @@ export default function SignIn({
   return (
     <>
       {Object.values(providers).map((provider) => (
-        <div key={provider.name}>
-          <button onClick={() => signIn(provider.id)}>
-            Sign in with {provider.name}
-          </button>
+        <div
+          className="flex h-screen flex-col items-center justify-center"
+          key={provider.name}
+        >
+          <div className="flex w-80 flex-col gap-10">
+            <h1 className="text-center text-3xl font-bold">Yummy Bites!</h1>
+            <button
+              className="relative inline h-fit rounded-lg border-2 border-solid border-blue-500 bg-blue-500 p-2 text-xs font-semibold text-white"
+              onClick={() => signIn(provider.id)}
+            >
+              <Image
+                className="absolute bottom-0 left-0 rounded-md"
+                src={"/google.jpg"}
+                height={0}
+                width={32}
+                alt={""}
+              />
+              Sign in with {provider.name}
+            </button>
+          </div>
         </div>
       ))}
     </>
