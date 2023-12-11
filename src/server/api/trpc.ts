@@ -7,6 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
+import { Role } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
@@ -107,11 +108,40 @@ export const createTRPCRouter = t.router;
  */
 export const publicProcedure = t.procedure;
 
-/** Reusable middleware that enforces users are logged in before running the procedure. */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user) {
+/** Reusable middleware that enforces users have the USER role before running the procedure. */
+const enforceUserRoleIsUser = t.middleware(({ ctx, next }) => {
+  if (!ctx.session?.user && ctx.session?.user.role !== Role.USER) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+/** Reusable middleware that enforces users have the ADMIN role before running the procedure. */
+const enforceUserRoleIsAdmin = t.middleware(({ ctx, next }) => {
+  if (!ctx.session?.user && ctx.session?.user.role !== Role.ADMIN) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+/** Reusable middleware that enforces users have the SUPERADMIN role before running the procedure. */
+const enforceUserRoleIsSuperAdmin = t.middleware(({ ctx, next }) => {
+  if (!ctx.session?.user && ctx.session?.user.role !== Role.SUPERADMIN) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
   return next({
     ctx: {
       // infers the `session` as non-nullable
@@ -128,4 +158,8 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const userRoleProcedure = t.procedure.use(enforceUserRoleIsUser);
+export const adminRoleProcedure = t.procedure.use(enforceUserRoleIsAdmin);
+export const superAdminRoleProcedure = t.procedure.use(
+  enforceUserRoleIsSuperAdmin,
+);

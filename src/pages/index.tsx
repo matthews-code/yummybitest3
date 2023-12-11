@@ -25,6 +25,7 @@ export const getServerSideProps: GetServerSideProps = withAuth(async () => {
 export default function Home() {
   const { data: sessionData } = useSession();
   const hello = api.post.hello.useQuery({ text: "from tRPC" });
+  // console.log(hello.data?.greeting);
 
   const [page, setPage] = useState<string>("orders");
 
@@ -39,7 +40,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Header setPage={setPage}></Header>
+        {sessionData && <Header setPage={setPage}></Header>}
         {sessionData && page === "orders" && <Order></Order>}
         {sessionData && page === "users" && <Users></Users>}
         {sessionData && page === "items" && <Items></Items>}

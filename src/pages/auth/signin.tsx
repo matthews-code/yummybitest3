@@ -17,7 +17,7 @@ export default function SignIn({
           className="flex h-screen flex-col items-center justify-center"
           key={provider.name}
         >
-          <div className="flex w-80 flex-col gap-10">
+          <div className="flex w-72 flex-col gap-8">
             <h1 className="text-center text-3xl font-bold">Yummy Bites!</h1>
             <button
               className="relative inline h-fit rounded-lg border-2 border-solid border-blue-500 bg-blue-500 p-2 text-xs font-semibold text-white"
@@ -28,7 +28,8 @@ export default function SignIn({
                 src={"/google.jpg"}
                 height={0}
                 width={32}
-                alt={""}
+                alt={"Google logo"}
+                unoptimized={true}
               />
               Sign in with {provider.name}
             </button>
