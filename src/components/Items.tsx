@@ -55,8 +55,12 @@ const Items = () => {
                 "add_item_modal",
               ) as HTMLDialogElement)!;
 
+              const itemNameElement = (document.getElementById(
+                "item-name-input",
+              ) as HTMLInputElement)!;
+
               modalElement.showModal();
-              modalElement.scrollIntoView(false);
+              itemNameElement.scrollIntoView();
             }}
           >
             <FaPlus size={32} color={"#4c4528"} />
