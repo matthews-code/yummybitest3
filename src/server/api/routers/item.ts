@@ -22,19 +22,15 @@ export const itemRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         price: z.number(),
-        inventory: z.number().int(),
+        inventory: z.number().int().nullable(),
       }),
     )
     .mutation(({ ctx, input }) => {
-      // simulate a slow db call
-
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
-
       return ctx.db.items.create({
         data: {
           name: input.name,
           price: input.price,
-          inventory: input.inventory,
+          inventory: input.inventory ?? null,
         },
       });
     }),
