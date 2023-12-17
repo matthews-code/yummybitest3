@@ -60,7 +60,7 @@ const Items = () => {
               ) as HTMLInputElement)!;
 
               modalElement.showModal();
-              itemNameElement.scrollIntoView();
+              itemNameElement.focus({ preventScroll: false });
             }}
           >
             <FaPlus size={32} color={"#4c4528"} />
