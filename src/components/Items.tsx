@@ -50,11 +50,14 @@ const Items = () => {
         {role === Role.ADMIN && (
           <button
             className="btn btn-circle btn-primary fixed bottom-7 right-7 h-16 w-16 shadow-md"
-            onClick={() =>
-              (document.getElementById(
+            onClick={() => {
+              const modalElement = (document.getElementById(
                 "add_item_modal",
-              ) as HTMLDialogElement)!.showModal()
-            }
+              ) as HTMLDialogElement)!;
+
+              modalElement.showModal();
+              modalElement.scrollIntoView(true);
+            }}
           >
             <FaPlus size={32} color={"#4c4528"} />
           </button>
