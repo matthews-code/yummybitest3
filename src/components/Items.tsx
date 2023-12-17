@@ -80,10 +80,7 @@ const Items = () => {
           </div>
         ))}
 
-        <dialog
-          id="add_item_modal"
-          className="modal modal-bottom sm:modal-middle"
-        >
+        <dialog id="add_item_modal" className="modal modal-top sm:modal-middle">
           <div className="modal-box p-5">
             <div className="label">
               <span className="label-text">Name</span>
