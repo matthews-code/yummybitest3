@@ -21,7 +21,10 @@ const Header: React.FC<HeaderProps> = ({ setPage }) => {
     <div className="navbar bg-primary text-primary-content">
       <div className="flex-1 pl-5 text-3xl font-bold">
         {sessionData ? (
-          <p onClick={() => setPage("orders")} className="cursor-pointer">
+          <p
+            onClick={() => setPage("orders")}
+            className="cursor-pointer text-xl sm:text-3xl"
+          >
             Yummy Bites Dashboard
           </p>
         ) : (

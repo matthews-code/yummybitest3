@@ -24,8 +24,7 @@ export const getServerSideProps: GetServerSideProps = withAuth(async () => {
 
 export default function Home() {
   const { data: sessionData } = useSession();
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
-  // console.log(hello.data?.greeting);
+  // const hello = api.post.hello.useQuery({ text: "from tRPC" });
 
   const [page, setPage] = useState<string>("orders");
 

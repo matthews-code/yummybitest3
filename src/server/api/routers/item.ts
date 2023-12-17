@@ -8,8 +8,8 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 
-export const postRouter = createTRPCRouter({
-  hello: adminRoleProcedure
+export const itemRouter = createTRPCRouter({
+  sample: adminRoleProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input }) => {
       return {
@@ -17,28 +17,31 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  create: userRoleProcedure
-    .input(z.object({ name: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
+  createItem: adminRoleProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        price: z.number(),
+        inventory: z.number().int(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
       // simulate a slow db call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      return ctx.db.post.create({
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      return ctx.db.items.create({
         data: {
           name: input.name,
-          createdBy: { connect: { id: ctx.session.user.id } },
+          price: input.price,
+          inventory: input.inventory,
         },
       });
     }),
 
-  getLatest: userRoleProcedure.query(({ ctx }) => {
-    return ctx.db.post.findFirst({
-      orderBy: { createdAt: "desc" },
-      where: { createdBy: { id: ctx.session.user.id } },
-    });
-  }),
-
-  getSecretMessage: userRoleProcedure.query(() => {
-    return "you can now see this secret message!";
+  // deleteItem:
+  getAllItems: userRoleProcedure.query(async ({ ctx }) => {
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    return ctx.db.items.findMany();
   }),
 });

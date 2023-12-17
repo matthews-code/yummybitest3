@@ -78,7 +78,7 @@ model items {
   item_uid   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name       String
   price      Decimal      @db.Decimal(15, 3)
-  inventory  Decimal      @db.Decimal(15, 0)
+  inventory  Decimal?      @db.Decimal(15, 0)
   item_order item_order[]
 }
 

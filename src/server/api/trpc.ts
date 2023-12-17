@@ -110,7 +110,7 @@ export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users have the USER role before running the procedure. */
 const enforceUserRoleIsUser = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user && ctx.session?.user.role !== Role.USER) {
+  if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
@@ -124,7 +124,7 @@ const enforceUserRoleIsUser = t.middleware(({ ctx, next }) => {
 
 /** Reusable middleware that enforces users have the ADMIN role before running the procedure. */
 const enforceUserRoleIsAdmin = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user && ctx.session?.user.role !== Role.ADMIN) {
+  if (!ctx.session?.user || ctx.session?.user.role !== Role.ADMIN) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
@@ -138,7 +138,7 @@ const enforceUserRoleIsAdmin = t.middleware(({ ctx, next }) => {
 
 /** Reusable middleware that enforces users have the SUPERADMIN role before running the procedure. */
 const enforceUserRoleIsSuperAdmin = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user && ctx.session?.user.role !== Role.SUPERADMIN) {
+  if (!ctx.session?.user || ctx.session?.user.role !== Role.SUPERADMIN) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
