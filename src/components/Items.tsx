@@ -53,7 +53,7 @@ const Items = () => {
             onClick={() =>
               (document.getElementById(
                 "add_item_modal",
-              ) as HTMLFormElement)!.showModal()
+              ) as HTMLDialogElement)!.showModal()
             }
           >
             <FaPlus size={32} color={"#4c4528"} />
