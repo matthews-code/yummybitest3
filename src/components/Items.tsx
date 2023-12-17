@@ -56,7 +56,7 @@ const Items = () => {
               ) as HTMLDialogElement)!;
 
               modalElement.showModal();
-              modalElement.scrollIntoView(true);
+              modalElement.scrollIntoView(false);
             }}
           >
             <FaPlus size={32} color={"#4c4528"} />
