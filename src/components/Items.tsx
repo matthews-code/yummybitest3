@@ -3,6 +3,8 @@ import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Role } from "@prisma/client";
 import { FaPlus } from "react-icons/fa6";
+import { MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 
 const Items = () => {
   const role = useSession().data?.user.role;
@@ -76,7 +78,7 @@ const Items = () => {
       <div className="h-[calc(100vh-66px)] w-full p-6 sm:w-3/4 sm:p-10">
         {role === Role.ADMIN && (
           <button
-            className="btn btn-circle btn-primary fixed bottom-7 right-7 h-16 w-16 shadow-md"
+            className="btn btn-circle btn-primary fixed bottom-8 right-8 h-16 w-16 shadow-md"
             onClick={() => {
               const modalElement = (document.getElementById(
                 "add_item_modal",
@@ -89,21 +91,32 @@ const Items = () => {
         )}
 
         <div className="overflow-x-auto">
-          <table className="table">
+          <table className="table sm:table-lg">
             <thead>
               <tr className="text-sm">
                 <th>Name</th>
                 <th>Price</th>
                 <th>Inventory</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {items?.map((item) => (
                 //   onDelete={() => void deleteNote.mutate({ id: note.id })}
-                <tr>
+                <tr
+                  key={item.item_uid}
+                  onClick={() => console.log(item.item_uid)}
+                >
                   <td>{item.name}</td>
                   <td>{item.price.toString()}</td>
                   <td>{item.inventory?.toString()}</td>
+                  <td className="">
+                    <div className="flex gap-3">
+                      <MdEdit color={"#6f7687"} />
+                      <MdDelete color={"#6f7687"} />
+                    </div>
+                  </td>
+                  {/* <td className="max-w-[10px]"></td> */}
                 </tr>
               ))}
             </tbody>
