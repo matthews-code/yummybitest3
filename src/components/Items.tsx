@@ -28,14 +28,18 @@ const Items = () => {
   const addItemEndpoint = api.item.createItem.useMutation({
     onSuccess: () => {
       void refetchItems();
-      console.log("add success");
     },
   });
 
   const editItemEndpoint = api.item.editItem.useMutation({
     onSuccess: () => {
       void refetchItems();
-      console.log("edit success");
+    },
+  });
+
+  const deleteItemEndpoint = api.item.deleteItem.useMutation({
+    onSuccess: () => {
+      void refetchItems();
     },
   });
 
@@ -70,11 +74,9 @@ const Items = () => {
     }
 
     if (!/^\d*$/.test(inventory)) {
-      console.log(inventory);
       return false;
     }
 
-    console.log(inventory);
     return true;
   };
 
@@ -122,6 +124,11 @@ const Items = () => {
     }
   };
 
+  const deleteItem = () => {
+    deleteItemEndpoint.mutate({ uid: itemUid });
+    clearStates();
+  };
+
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full p-2 sm:w-4/5 sm:p-8 lg:w-3/5">
@@ -137,7 +144,6 @@ const Items = () => {
             </thead>
             <tbody>
               {items?.map((item) => (
-                //   onDelete={() => void deleteNote.mutate({ id: note.id })}
                 <tr key={item.item_uid}>
                   <td>{item.name}</td>
                   <td>{item.price.toString()}</td>
@@ -171,7 +177,18 @@ const Items = () => {
                       >
                         <MdEdit color={"#6f7687"} size={"1.1rem"} />
                       </button>
-                      <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                      <button
+                        onClick={() => {
+                          setItemName(item.name);
+                          setItemUid(item.item_uid);
+                          const modalElement = (document.getElementById(
+                            "delete_item_modal",
+                          ) as HTMLDialogElement)!;
+                          modalElement.showModal();
+                        }}
+                      >
+                        <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -361,6 +378,32 @@ const Items = () => {
                 >
                   cancel
                 </button>
+              </form>
+            </div>
+          </div>
+        </dialog>
+
+        {/* DELETE ITEM MODAL */}
+
+        <dialog
+          id="delete_item_modal"
+          className="modal modal-top sm:modal-middle"
+        >
+          <div className="modal-box p-5">
+            <h1 className="text-lg font-bold">Delete Item</h1>
+            <div className="divider m-0 p-0"></div>
+            <p>
+              Are you sure you want to delete <b>{itemName}</b>?
+            </p>
+            <div className="modal-action">
+              <form method="dialog" className="flex gap-2">
+                <button
+                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
+                  onClick={deleteItem}
+                >
+                  delete
+                </button>
+                <button className="btn border-none">cancel</button>
               </form>
             </div>
           </div>

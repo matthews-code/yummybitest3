@@ -64,9 +64,18 @@ export const itemRouter = createTRPCRouter({
       });
     }),
 
-  // deleteItem:
-  getAllItems: userRoleProcedure.query(async ({ ctx }) => {
-    return await ctx.db.items.findMany({
+  deleteItem: adminRoleProcedure
+    .input(z.object({ uid: z.string() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.db.items.delete({
+        where: {
+          item_uid: input.uid,
+        },
+      });
+    }),
+
+  getAllItems: userRoleProcedure.query(({ ctx }) => {
+    return ctx.db.items.findMany({
       orderBy: [
         {
           created_at: "asc",
