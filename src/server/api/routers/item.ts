@@ -1,3 +1,6 @@
+import dayjs from "dayjs";
+import tz from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { z } from "zod";
 
 import {
@@ -7,6 +10,9 @@ import {
   superAdminRoleProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+
+dayjs.extend(tz);
+dayjs.extend(utc);
 
 export const itemRouter = createTRPCRouter({
   sample: adminRoleProcedure
@@ -31,13 +37,41 @@ export const itemRouter = createTRPCRouter({
           name: input.name,
           price: input.price,
           inventory: input.inventory ?? null,
+          created_at: dayjs().toISOString(),
+        },
+      });
+    }),
+
+  editItem: adminRoleProcedure
+    .input(
+      z.object({
+        uid: z.string(),
+        name: z.string(),
+        price: z.number(),
+        inventory: z.number().int().nullable(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.db.items.update({
+        where: {
+          item_uid: input.uid,
+        },
+        data: {
+          name: input.name,
+          price: input.price,
+          inventory: input.inventory ?? null,
         },
       });
     }),
 
   // deleteItem:
   getAllItems: userRoleProcedure.query(async ({ ctx }) => {
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
-    return ctx.db.items.findMany();
+    return await ctx.db.items.findMany({
+      orderBy: [
+        {
+          created_at: "asc",
+        },
+      ],
+    });
   }),
 });

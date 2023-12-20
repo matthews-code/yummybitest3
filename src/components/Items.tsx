@@ -13,6 +13,11 @@ const Items = () => {
   const itemPriceInput = useRef<HTMLInputElement>(null);
   const itemInventoryInput = useRef<HTMLInputElement>(null);
 
+  const editItemNameInput = useRef<HTMLInputElement>(null);
+  const editItemPriceInput = useRef<HTMLInputElement>(null);
+  const editItemInventoryInput = useRef<HTMLInputElement>(null);
+
+  const [itemUid, setItemUid] = useState<string>("");
   const [itemName, setItemName] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
   const [itemInventory, setItemInventory] = useState<string>("");
@@ -20,76 +25,106 @@ const Items = () => {
   const { data: items, refetch: refetchItems } =
     api.item.getAllItems.useQuery();
 
-  const createItem = api.item.createItem.useMutation({
+  const addItemEndpoint = api.item.createItem.useMutation({
     onSuccess: () => {
       void refetchItems();
+      console.log("add success");
     },
   });
 
-  const checkErrors = () => {
-    if (itemName === "") {
-      console.log("here");
-      itemNameInput.current?.classList.add("input-error");
+  const editItemEndpoint = api.item.editItem.useMutation({
+    onSuccess: () => {
+      void refetchItems();
+      console.log("edit success");
+    },
+  });
+
+  const clearStates = () => {
+    setItemName("");
+    setItemPrice("");
+    setItemInventory("");
+  };
+
+  const checkErrors = (
+    name: string,
+    price: string,
+    inventory: string,
+    addItem: boolean,
+  ) => {
+    if (name === "") {
+      addItem
+        ? itemNameInput.current?.classList.add("input-error")
+        : editItemNameInput.current?.classList.add("input-error");
       return false;
     }
 
-    if (itemPrice === "") {
-      itemPriceInput.current?.classList.add("input-error");
+    if (price === "") {
+      addItem
+        ? itemPriceInput.current?.classList.add("input-error")
+        : editItemPriceInput.current?.classList.add("input-error");
       return false;
     }
 
-    if (!/^\d*\.?\d*$/.test(itemPrice)) {
+    if (!/^\d*\.?\d*$/.test(price)) {
       return false;
     }
 
-    if (!/^\d*$/.test(itemInventory)) {
+    if (!/^\d*$/.test(inventory)) {
+      console.log(inventory);
       return false;
     }
 
+    console.log(inventory);
     return true;
   };
 
-  const modalBehaviour = () => {
+  const modalBehaviour = (addItem: boolean) => {
+    const elementId = addItem ? "add_item_modal" : "edit_item_modal";
     const modalElement = (document.getElementById(
-      "add_item_modal",
+      elementId,
     ) as HTMLDialogElement)!;
 
     modalElement.close();
   };
 
-  const addItem = () => {
-    if (checkErrors()) {
-      createItem.mutate({
+  const addItem = (
+    name: string,
+    price: string,
+    inventory: string,
+    addItem: boolean,
+  ) => {
+    if (checkErrors(name, price, inventory, addItem)) {
+      addItemEndpoint.mutate({
+        name: name,
+        price: Number(price),
+        inventory: inventory === "" ? null : Number(inventory),
+      });
+      clearStates();
+      modalBehaviour(addItem);
+    }
+  };
+
+  const editItem = (
+    name: string,
+    price: string,
+    inventory: string,
+    addItem: boolean,
+  ) => {
+    if (checkErrors(name, price, inventory, addItem)) {
+      editItemEndpoint.mutate({
+        uid: itemUid,
         name: itemName,
         price: Number(itemPrice),
         inventory: itemInventory === "" ? null : Number(itemInventory),
       });
-      setItemName("");
-      setItemPrice("");
-      setItemInventory("");
-      modalBehaviour();
-    } else {
-      console.log("nope");
+      clearStates();
+      modalBehaviour(addItem);
     }
   };
 
   return (
     <div className="flex justify-center">
-      <div className="h-[calc(100vh-66px)] w-full p-6 sm:w-3/4 sm:p-10">
-        {role === Role.ADMIN && (
-          <button
-            className="btn btn-circle btn-primary fixed bottom-8 right-8 h-16 w-16 shadow-md"
-            onClick={() => {
-              const modalElement = (document.getElementById(
-                "add_item_modal",
-              ) as HTMLDialogElement)!;
-              modalElement.showModal();
-            }}
-          >
-            <FaPlus size={32} color={"#4c4528"} />
-          </button>
-        )}
-
+      <div className="h-[calc(100vh-66px)] w-full p-2 sm:w-4/5 sm:p-8 lg:w-3/5">
         <div className="overflow-x-auto">
           <table className="table sm:table-lg">
             <thead>
@@ -103,32 +138,56 @@ const Items = () => {
             <tbody>
               {items?.map((item) => (
                 //   onDelete={() => void deleteNote.mutate({ id: note.id })}
-                <tr
-                  key={item.item_uid}
-                  onClick={() => console.log(item.item_uid)}
-                >
+                <tr key={item.item_uid}>
                   <td>{item.name}</td>
                   <td>{item.price.toString()}</td>
                   <td>{item.inventory?.toString()}</td>
                   <td className="">
                     <div className="flex gap-3">
-                      <MdEdit color={"#6f7687"} />
-                      <MdDelete color={"#6f7687"} />
+                      <button
+                        onClick={() => {
+                          const modalElement = (document.getElementById(
+                            "edit_item_modal",
+                          ) as HTMLDialogElement)!;
+                          modalElement.showModal();
+                          if (
+                            editItemNameInput.current !== null &&
+                            editItemPriceInput.current !== null &&
+                            editItemInventoryInput.current !== null
+                          ) {
+                            setItemUid(item.item_uid);
+
+                            setItemName(item.name);
+                            setItemPrice(item.price.toString());
+                            setItemInventory(item.inventory?.toString() ?? "");
+
+                            editItemNameInput.current.value = item.name;
+                            editItemPriceInput.current.value =
+                              item.price.toString();
+                            editItemInventoryInput.current.value =
+                              item.inventory?.toString() ?? "";
+                          }
+                        }}
+                      >
+                        <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                      </button>
+                      <MdDelete color={"#6f7687"} size={"1.1rem"} />
                     </div>
                   </td>
-                  {/* <td className="max-w-[10px]"></td> */}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        {/* MODAL */}
+        {/* ADD ITEM MODAL */}
 
         <dialog id="add_item_modal" className="modal modal-top sm:modal-middle">
           <div className="modal-box p-5">
+            <h1 className="text-lg font-bold">Add Item</h1>
+            <div className="divider m-0 p-0"></div>
             <div className="label">
-              <span className="label-text text-base">Name</span>
+              <span className="label-text">Name</span>
             </div>
             <input
               id="item-name-input"
@@ -145,7 +204,7 @@ const Items = () => {
             <div className="mt-2 flex gap-4">
               <div className="w-full">
                 <div className="label">
-                  <span className="label-text text-base">Price Per Piece</span>
+                  <span className="label-text">Price Per Piece</span>
                 </div>
                 <input
                   id="item-price-input"
@@ -166,7 +225,7 @@ const Items = () => {
               </div>
               <div className="w-full">
                 <div className="label">
-                  <span className="label-text text-base">
+                  <span className="label-text">
                     Inventory - <i className="text-sm">Optional</i>
                   </span>
                 </div>
@@ -195,7 +254,9 @@ const Items = () => {
                 <div
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={addItem}
+                  onClick={() =>
+                    addItem(itemName, itemPrice, itemInventory, true)
+                  }
                 >
                   add
                 </div>
@@ -204,6 +265,120 @@ const Items = () => {
             </div>
           </div>
         </dialog>
+
+        {/* EDIT ITEM MODAL */}
+
+        <dialog
+          id="edit_item_modal"
+          className="modal modal-top sm:modal-middle"
+        >
+          <div className="modal-box p-5">
+            <h1 className="text-lg font-bold">Edit Item</h1>
+            <div className="divider m-0 p-0"></div>
+            <div className="label">
+              <span className="label-text">Name</span>
+            </div>
+            <input
+              id="edit-name-input"
+              ref={editItemNameInput}
+              type="text"
+              className="input input-bordered input-md w-full"
+              onChange={(e) => {
+                setItemName(e.currentTarget.value);
+                editItemNameInput.current?.classList.remove("input-error");
+              }}
+            />
+            <div className="mt-2 flex gap-4">
+              <div className="w-full">
+                <div className="label">
+                  <span className="label-text">Price Per Piece</span>
+                </div>
+                <input
+                  id="item-price-input"
+                  ref={editItemPriceInput}
+                  type="text"
+                  className="input input-bordered input-md w-full"
+                  onChange={(e) => {
+                    setItemPrice(e.currentTarget.value);
+                    if (!/^\d*\.?\d*$/.test(e.currentTarget.value)) {
+                      editItemPriceInput.current?.classList.add("input-error");
+                    } else {
+                      editItemPriceInput.current?.classList.remove(
+                        "input-error",
+                      );
+                    }
+                  }}
+                />
+              </div>
+              <div className="w-full">
+                <div className="label">
+                  <span className="label-text">
+                    Inventory - <i className="text-sm">Optional</i>
+                  </span>
+                </div>
+                <input
+                  id="item-inventory-input"
+                  ref={editItemInventoryInput}
+                  type="text"
+                  className="input input-bordered input-md w-full"
+                  onChange={(e) => {
+                    setItemInventory(e.currentTarget.value);
+                    if (!/^\d*$/.test(e.currentTarget.value)) {
+                      editItemInventoryInput.current?.classList.add(
+                        "input-error",
+                      );
+                    } else {
+                      editItemInventoryInput.current?.classList.remove(
+                        "input-error",
+                      );
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="modal-action">
+              <form method="dialog" className="flex gap-2">
+                <div
+                  tabIndex={0}
+                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
+                  onClick={() =>
+                    editItem(itemName, itemPrice, itemInventory, false)
+                  }
+                >
+                  save
+                </div>
+                <button
+                  className="btn border-none"
+                  onClick={() => {
+                    editItemNameInput.current?.classList.remove("input-error");
+                    editItemPriceInput.current?.classList.remove("input-error");
+                    editItemInventoryInput.current?.classList.remove(
+                      "input-error",
+                    );
+
+                    clearStates();
+                  }}
+                >
+                  cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </dialog>
+
+        {role === Role.ADMIN && (
+          <button
+            className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
+            onClick={() => {
+              const modalElement = (document.getElementById(
+                "add_item_modal",
+              ) as HTMLDialogElement)!;
+              modalElement.showModal();
+            }}
+          >
+            <FaPlus size={32} color={"#4c4528"} />
+          </button>
+        )}
       </div>
     </div>
   );
