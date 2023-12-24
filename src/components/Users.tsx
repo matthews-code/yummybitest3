@@ -119,18 +119,32 @@ const Users = () => {
         <div className="grid gap-4 py-4 md:grid-cols-2 xl:grid-cols-3">
           {users
             ?.filter((user) => {
-              return (
+              if (
                 user.first_name
                   .toLowerCase()
-                  .startsWith(searchInput.toLowerCase()) ||
+                  .startsWith(searchInput.toLowerCase())
+              ) {
+                return true;
+              }
+              if (
                 user.last_name
                   ?.toLowerCase()
-                  .startsWith(searchInput.toLowerCase()) ||
-                user.contact_num.startsWith(searchInput) ||
+                  .startsWith(searchInput.toLowerCase())
+              ) {
+                return true;
+              }
+              if (
                 `${user.first_name.toLowerCase()} ${user.last_name?.toLowerCase()}`.startsWith(
                   searchInput.toLowerCase(),
                 )
-              );
+              ) {
+                return true;
+              }
+              if (user.contact_num.startsWith(searchInput)) {
+                return true;
+              }
+
+              return false;
             })
             .map((user) => (
               <div key={user.user_uid} className="card bg-base-100 shadow-md">
