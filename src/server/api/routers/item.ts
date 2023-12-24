@@ -1,6 +1,4 @@
 import dayjs from "dayjs";
-import tz from "dayjs/plugin/timezone";
-import utc from "dayjs/plugin/utc";
 import { z } from "zod";
 
 import {
@@ -11,17 +9,14 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 
-dayjs.extend(tz);
-dayjs.extend(utc);
-
 export const itemRouter = createTRPCRouter({
-  sample: adminRoleProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
+  // sample: adminRoleProcedure
+  //   .input(z.object({ text: z.string() }))
+  //   .query(({ input }) => {
+  //     return {
+  //       greeting: `Hello ${input.text}`,
+  //     };
+  //   }),
 
   createItem: adminRoleProcedure
     .input(

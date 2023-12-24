@@ -131,7 +131,7 @@ const Items = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="h-[calc(100vh-66px)] w-full p-2 sm:w-4/5 sm:p-8 lg:w-3/5">
+      <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
         <div className="overflow-x-auto">
           <table className="table sm:table-lg">
             <thead>
@@ -393,7 +393,7 @@ const Items = () => {
             <h1 className="text-lg font-bold">Delete Item</h1>
             <div className="divider m-0 p-0"></div>
             <p>
-              Are you sure you want to delete <b>{itemName}</b>?
+              Are you sure you want to delete <b>{itemName}?</b>
             </p>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
