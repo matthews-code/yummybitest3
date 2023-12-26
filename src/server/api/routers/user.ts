@@ -30,6 +30,40 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
+  editUser: adminRoleProcedure
+    .input(
+      z.object({
+        uid: z.string(),
+        firstName: z.string(),
+        lastName: z.string().nullable(),
+        contactNum: z.string(),
+        address: z.string().nullable(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.db.users.update({
+        where: {
+          user_uid: input.uid,
+        },
+        data: {
+          first_name: input.firstName,
+          last_name: input.lastName,
+          contact_num: input.contactNum,
+          address: input.address,
+        },
+      });
+    }),
+
+  deleteUser: adminRoleProcedure
+    .input(z.object({ uid: z.string() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.db.users.delete({
+        where: {
+          user_uid: input.uid,
+        },
+      });
+    }),
+
   getAllUsers: userRoleProcedure.query(({ ctx }) => {
     return ctx.db.users.findMany({
       orderBy: [

@@ -403,7 +403,9 @@ const Items = () => {
                 >
                   delete
                 </button>
-                <button className="btn border-none">cancel</button>
+                <button className="btn border-none" onClick={clearStates}>
+                  cancel
+                </button>
               </form>
             </div>
           </div>

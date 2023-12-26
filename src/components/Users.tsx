@@ -9,6 +9,7 @@ const Users = () => {
   const role = useSession().data?.user.role;
 
   const duplicateNumberText = useRef<HTMLParagraphElement>(null);
+  const editDuplicateNumberText = useRef<HTMLParagraphElement>(null);
 
   const userFirstNameInput = useRef<HTMLInputElement>(null);
   const userLastNameInput = useRef<HTMLInputElement>(null);
@@ -32,6 +33,18 @@ const Users = () => {
     api.user.getAllUsers.useQuery();
 
   const addUserEndpoint = api.user.createUser.useMutation({
+    onSuccess: () => {
+      void refetchUsers();
+    },
+  });
+
+  const editUserEndpoint = api.user.editUser.useMutation({
+    onSuccess: () => {
+      void refetchUsers();
+    },
+  });
+
+  const deleteUserEndpoint = api.user.deleteUser.useMutation({
     onSuccess: () => {
       void refetchUsers();
     },
@@ -72,9 +85,14 @@ const Users = () => {
       return false;
     }
 
-    if (users?.some((user) => user.contact_num === contactNum)) {
-      duplicateNumberText.current?.classList.remove("hidden");
-      // console.log("duplicate contact number");
+    if (
+      users?.some(
+        (user) => user.contact_num === contactNum && user.user_uid !== userUid,
+      )
+    ) {
+      addUser
+        ? duplicateNumberText.current?.classList.remove("hidden")
+        : editDuplicateNumberText.current?.classList.remove("hidden");
       return false;
     }
 
@@ -107,6 +125,32 @@ const Users = () => {
       clearStates();
       modalBehaviour(addUser);
     }
+  };
+
+  const editUser = (
+    firstName: string,
+    lastName: string,
+    contactNum: string,
+    address: string,
+    addUser: boolean,
+  ) => {
+    if (checkErrors(firstName, lastName, contactNum, address, addUser)) {
+      editUserEndpoint.mutate({
+        uid: userUid,
+        firstName: firstName,
+        lastName: lastName,
+        contactNum: contactNum,
+        address: address,
+      });
+      clearStates();
+      modalBehaviour(addUser);
+      editDuplicateNumberText.current?.classList.add("hidden");
+    }
+  };
+
+  const deleteUser = () => {
+    deleteUserEndpoint.mutate({ uid: userUid });
+    clearStates();
   };
 
   return (
@@ -195,7 +239,16 @@ const Users = () => {
                       >
                         <MdEdit color={"#6f7687"} size={"1.1rem"} />
                       </button>
-                      <button>
+                      <button
+                        onClick={() => {
+                          setUserFirstName(user.first_name);
+                          setUserUid(user.user_uid);
+                          const modalElement = (document.getElementById(
+                            "delete_user_modal",
+                          ) as HTMLDialogElement)!;
+                          modalElement.showModal();
+                        }}
+                      >
                         <MdDelete color={"#6f7687"} size={"1.1rem"} />
                       </button>
                     </div>
@@ -361,7 +414,10 @@ const Users = () => {
               <div className="label">
                 <span className="label-text">
                   Contact Number{" "}
-                  <i ref={duplicateNumberText} className="hidden text-red-600">
+                  <i
+                    ref={editDuplicateNumberText}
+                    className="hidden text-red-600"
+                  >
                     (number is already taken)
                   </i>
                 </span>
@@ -371,7 +427,21 @@ const Users = () => {
                 ref={editUserContactNumInput}
                 type="text"
                 className="input input-bordered input-md w-full"
-                onChange={() => null}
+                onChange={(e) => {
+                  setUserContactNum(e.currentTarget.value);
+
+                  if (!/^\d{0,11}$/.test(e.currentTarget.value)) {
+                    editUserContactNumInput.current?.classList.add(
+                      "input-error",
+                    );
+                  } else {
+                    editUserContactNumInput.current?.classList.remove(
+                      "input-error",
+                    );
+                  }
+
+                  editDuplicateNumberText.current?.classList.add("hidden");
+                }}
               />
             </div>
             <div className="mt-2">
@@ -385,7 +455,7 @@ const Users = () => {
                 ref={editUserAddressInput}
                 type="text"
                 className="input input-bordered input-md w-full"
-                onChange={() => null}
+                onChange={(e) => setUserAddress(e.currentTarget.value)}
               />
             </div>
             <div className="modal-action">
@@ -393,17 +463,72 @@ const Users = () => {
                 <div
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={() => null}
+                  onClick={() =>
+                    editUser(
+                      userFirstName,
+                      userLastName,
+                      userContactNum,
+                      userAddress,
+                      false,
+                    )
+                  }
                 >
-                  add
+                  save
                 </div>
-                <button className="btn border-none">cancel</button>
+                <button
+                  className="btn border-none"
+                  onClick={() => {
+                    editUserFirstNameInput.current?.classList.remove(
+                      "input-error",
+                    );
+                    editUserLastNameInput.current?.classList.remove(
+                      "input-error",
+                    );
+                    editUserContactNumInput.current?.classList.remove(
+                      "input-error",
+                    );
+                    editUserAddressInput.current?.classList.remove(
+                      "input-error",
+                    );
+                    editDuplicateNumberText.current?.classList.add("hidden");
+
+                    clearStates();
+                  }}
+                >
+                  cancel
+                </button>
               </form>
             </div>
           </div>
         </dialog>
 
         {/* DELETE USER MODAL */}
+
+        <dialog
+          id="delete_user_modal"
+          className="modal modal-top sm:modal-middle"
+        >
+          <div className="modal-box p-5">
+            <h1 className="text-lg font-bold">Delete Item</h1>
+            <div className="divider m-0 p-0"></div>
+            <p>
+              Are you sure you want to delete <b>{userFirstName}?</b>
+            </p>
+            <div className="modal-action">
+              <form method="dialog" className="flex gap-2">
+                <button
+                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
+                  onClick={deleteUser}
+                >
+                  delete
+                </button>
+                <button className="btn border-none" onClick={clearStates}>
+                  cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </dialog>
 
         {role === Role.ADMIN && (
           <button
