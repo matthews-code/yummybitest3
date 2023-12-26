@@ -3,11 +3,13 @@ import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Role } from "@prisma/client";
 import { FaPlus } from "react-icons/fa6";
+import { MdDelete, MdEdit } from "react-icons/md";
 
 const Users = () => {
   const role = useSession().data?.user.role;
 
   const duplicateNumberText = useRef<HTMLParagraphElement>(null);
+
   const userFirstNameInput = useRef<HTMLInputElement>(null);
   const userLastNameInput = useRef<HTMLInputElement>(null);
   const userContactNumInput = useRef<HTMLInputElement>(null);
@@ -20,6 +22,7 @@ const Users = () => {
 
   const [searchInput, setSearchInput] = useState<string>("");
 
+  const [userUid, setUserUid] = useState<string>("");
   const [userFirstName, setUserFirstName] = useState<string>("");
   const [userLastName, setUserLastName] = useState<string>("");
   const [userContactNum, setUserContactNum] = useState<string>("");
@@ -71,7 +74,7 @@ const Users = () => {
 
     if (users?.some((user) => user.contact_num === contactNum)) {
       duplicateNumberText.current?.classList.remove("hidden");
-      console.log("duplicate contact number");
+      // console.log("duplicate contact number");
       return false;
     }
 
@@ -154,10 +157,48 @@ const Users = () => {
                   </h1>
                   <p className="mt-[-0.5rem]">{user.contact_num}</p>
                   <p>{user.address}</p>
-                  <div className="card-actions mt-1 justify-start">
+                  <div className="card-actions mt-1 flex w-full justify-between">
                     <button className="btn btn-primary btn-sm">
                       Order History
                     </button>
+                    <div className="flex gap-2 self-center">
+                      <button
+                        onClick={() => {
+                          const modalElement = (document.getElementById(
+                            "edit_user_modal",
+                          ) as HTMLDialogElement)!;
+                          modalElement.showModal();
+
+                          if (
+                            editUserFirstNameInput.current !== null &&
+                            editUserLastNameInput.current !== null &&
+                            editUserContactNumInput.current !== null &&
+                            editUserAddressInput.current !== null
+                          ) {
+                            setUserUid(user.user_uid);
+
+                            setUserFirstName(user.first_name);
+                            setUserLastName(user.last_name ?? "");
+                            setUserContactNum(user.contact_num);
+                            setUserAddress(user.address ?? "");
+
+                            editUserFirstNameInput.current.value =
+                              user.first_name;
+                            editUserLastNameInput.current.value =
+                              user.last_name ?? "";
+                            editUserContactNumInput.current.value =
+                              user.contact_num;
+                            editUserAddressInput.current.value =
+                              user.address ?? "";
+                          }
+                        }}
+                      >
+                        <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                      </button>
+                      <button>
+                        <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -275,6 +316,92 @@ const Users = () => {
         </dialog>
 
         {/* EDIT USER MODAL */}
+
+        <dialog
+          id="edit_user_modal"
+          className="modal modal-top sm:modal-middle"
+        >
+          <div className="modal-box p-5">
+            <h1 className="text-lg font-bold">Edit User</h1>
+            <div className="divider m-0 p-0"></div>
+            <div className="mt-2 flex gap-4">
+              <div className="w-full">
+                <div className="label">
+                  <span className="label-text">First name</span>
+                </div>
+                <input
+                  id="edit-user-first-name-input"
+                  ref={editUserFirstNameInput}
+                  type="text"
+                  className="input input-bordered input-md w-full"
+                  onChange={(e) => {
+                    setUserFirstName(e.currentTarget.value);
+                    editUserFirstNameInput.current?.classList.remove(
+                      "input-error",
+                    );
+                  }}
+                />
+              </div>
+              <div className="w-full">
+                <div className="label">
+                  <span className="label-text">
+                    Last name - <i className="text-sm">Optional</i>
+                  </span>
+                </div>
+                <input
+                  id="edit-user-last-name-input"
+                  ref={editUserLastNameInput}
+                  type="text"
+                  className="input input-bordered input-md w-full"
+                  onChange={(e) => setUserLastName(e.currentTarget.value)}
+                />
+              </div>
+            </div>
+            <div className="mt-2">
+              <div className="label">
+                <span className="label-text">
+                  Contact Number{" "}
+                  <i ref={duplicateNumberText} className="hidden text-red-600">
+                    (number is already taken)
+                  </i>
+                </span>
+              </div>
+              <input
+                id="edit-user-contact-number-input"
+                ref={editUserContactNumInput}
+                type="text"
+                className="input input-bordered input-md w-full"
+                onChange={() => null}
+              />
+            </div>
+            <div className="mt-2">
+              <div className="label">
+                <span className="label-text">
+                  Address - <i className="text-sm">Optional</i>
+                </span>
+              </div>
+              <input
+                id="edit-user-address-input"
+                ref={editUserAddressInput}
+                type="text"
+                className="input input-bordered input-md w-full"
+                onChange={() => null}
+              />
+            </div>
+            <div className="modal-action">
+              <form method="dialog" className="flex gap-2">
+                <div
+                  tabIndex={0}
+                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
+                  onClick={() => null}
+                >
+                  add
+                </div>
+                <button className="btn border-none">cancel</button>
+              </form>
+            </div>
+          </div>
+        </dialog>
 
         {/* DELETE USER MODAL */}
 

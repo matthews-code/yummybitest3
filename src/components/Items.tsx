@@ -149,7 +149,7 @@ const Items = () => {
                   <td>{item.price.toString()}</td>
                   <td>{item.inventory?.toString()}</td>
                   <td className="">
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => {
                           const modalElement = (document.getElementById(
