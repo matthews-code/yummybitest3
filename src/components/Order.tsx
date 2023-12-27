@@ -1,57 +1,54 @@
 import { useState } from "react";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import dayjs, { Dayjs } from "dayjs";
+import { Role } from "@prisma/client";
+import { FaPlus } from "react-icons/fa6";
+import { useSession } from "next-auth/react";
 
 const Order = () => {
+  const role = useSession().data?.user.role;
+
   const [date, setDate] = useState(Date());
 
   return (
     <div className="flex justify-center">
-      <div className="dark-border flex h-[calc(100vh-66px)] w-4/5 flex-col gap-4 p-12">
-        <div className="light-border flex justify-center">
-          <MobileDatePicker
-            className="font-bold"
-            closeOnSelect={true}
-            value={dayjs(date)}
-            onChange={(value: Dayjs | null) => {
-              console.log(value?.toDate());
+      <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
+        <MobileDatePicker
+          className="self-center"
+          closeOnSelect={true}
+          sx={{
+            width: "100%",
+            ".MuiInputBase-input": {
+              letterSpacing: 0.5,
+              alignSelf: "center",
+              textAlign: "center",
+              fontFamily: "sans-serif",
+              // fontSize: "0.95rem",
+            },
+            ".MuiInputBase-root": {
+              borderRadius: 2,
+              height: 48,
+            },
+          }}
+          value={dayjs(date)}
+          onChange={(value: Dayjs | null) => {
+            console.log(value?.toDate());
+          }}
+        />
+
+        {role === Role.ADMIN && (
+          <button
+            className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
+            onClick={() => {
+              const modalElement = (document.getElementById(
+                "add_order_modal",
+              ) as HTMLDialogElement)!;
+              modalElement.showModal();
             }}
-          />
-        </div>
-        <div className="overflow-x-auto">
-          <table className="medium-border table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Job</th>
-                <th>Favorite Color</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>1</th>
-                <td>Cy Ganderton</td>
-                <td>Quality Control Specialist</td>
-                <td>Blue</td>
-              </tr>
-              <tr>
-                <th>2</th>
-                <td>Hart Hagerty</td>
-                <td>
-                  <a href="">Desktop Support Technician</a>
-                </td>
-                <td>Purple</td>
-              </tr>
-              <tr>
-                <th>3</th>
-                <td>Brice Swyre</td>
-                <td>Tax Accountant</td>
-                <td>Red</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          >
+            <FaPlus size={32} color={"#4c4528"} />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -163,7 +163,7 @@ const Users = () => {
           onChange={(e) => setSearchInput(e.currentTarget.value)}
         />
 
-        <div className="grid gap-4 py-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-4 pb-24 md:grid-cols-2 xl:grid-cols-3">
           {users
             ?.filter((user) => {
               if (
