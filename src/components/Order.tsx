@@ -23,7 +23,7 @@ const Order = () => {
             ".MuiInputBase-input": {
               letterSpacing: 0.5,
               textAlign: "center",
-              fontFamily: "segoe ui",
+              fontFamily: "segoe-ui",
             },
             ".MuiInputBase-root": {
               borderRadius: 2,
