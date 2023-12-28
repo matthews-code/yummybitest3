@@ -85,7 +85,7 @@ model items {
 
 model orders {
   order_uid         String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  date              DateTime     @db.Timestamp(6)
+  date              DateTime     @db.Timestamptz()
   amount_due        Decimal      @db.Decimal(15, 3)
   payment_status    String?
   payment_mode      String?

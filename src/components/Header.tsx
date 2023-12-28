@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ setPage }) => {
         {sessionData ? (
           <p
             onClick={() => setPage("orders")}
-            className="cursor-pointer text-xl sm:text-3xl"
+            className="cursor-pointer text-xl text-[#3d3d3d] sm:text-3xl"
           >
             Yummy Bites Dashboard
           </p>

@@ -163,7 +163,7 @@ const Users = () => {
           onChange={(e) => setSearchInput(e.currentTarget.value)}
         />
 
-        <div className="mt-4 grid gap-4 pb-24 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-3 pb-24 md:grid-cols-2 xl:grid-cols-3">
           {users
             ?.filter((user) => {
               if (
@@ -512,7 +512,7 @@ const Users = () => {
             <h1 className="text-lg font-bold">Delete Item</h1>
             <div className="divider m-0 p-0"></div>
             <p>
-              Are you sure you want to delete <b>{userFirstName}?</b>
+              Are you sure you want to delete <b>{userFirstName}</b>?
             </p>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">

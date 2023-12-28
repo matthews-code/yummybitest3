@@ -42,7 +42,7 @@ export default function Home() {
         /> */}
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
+      <main className="bg-[#faf9f6]">
         {sessionData && <Header setPage={setPage}></Header>}
         {sessionData && page === "orders" && <Order></Order>}
         {sessionData && page === "users" && <Users></Users>}
