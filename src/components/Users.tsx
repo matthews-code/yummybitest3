@@ -163,7 +163,7 @@ const Users = () => {
           onChange={(e) => setSearchInput(e.currentTarget.value)}
         />
 
-        <div className="mt-4 grid gap-3 pb-24 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-3 pb-28 md:grid-cols-2 xl:grid-cols-3">
           {users
             ?.filter((user) => {
               if (
@@ -199,7 +199,9 @@ const Users = () => {
                   <h1 className="card-title m-0 p-0 text-lg">
                     {user.first_name} {user.last_name}
                   </h1>
-                  <p className="mt-[-0.5rem]">{user.contact_num}</p>
+                  <p className="mt-[-0.5rem] text-[#4c4c4c]">
+                    {user.contact_num}
+                  </p>
                   <p>{user.address}</p>
                   <div className="card-actions mt-1 flex w-full justify-between">
                     <button className="btn btn-primary btn-sm">
@@ -257,6 +259,7 @@ const Users = () => {
               </div>
             ))}
         </div>
+
         {/* ADD USER MODAL */}
 
         <dialog id="add_user_modal" className="modal modal-top sm:modal-middle">
