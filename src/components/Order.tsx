@@ -7,10 +7,17 @@ import { FaPlus } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { MdDelete, MdEdit } from "react-icons/md";
 
+// const enum sample {
+//   DATE = 1,
+//   COSTUMER = "costumer",
+//   ORDER = "order",
+// }
+
 const Order = () => {
   const role = useSession().data?.user.role;
 
   const [date, setDate] = useState(Date());
+  const [addOrderStep, setAddOrderStep] = useState(1);
 
   return (
     <div className="flex justify-center">
@@ -23,7 +30,7 @@ const Order = () => {
             ".MuiInputBase-input": {
               letterSpacing: 0.5,
               textAlign: "center",
-              fontFamily: "segoe-ui",
+              fontFamily: "Segoe ui",
             },
             ".MuiInputBase-root": {
               borderRadius: 2,
@@ -47,10 +54,8 @@ const Order = () => {
                   <p className="text-sm text-[#707070]">09177951792</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-medium">₱1200</p>
-                  <p className="text-sm text-[#707070]">
-                    Gcash - Partial (₱1000)
-                  </p>
+                  <p className="text-lg font-medium">₱1200 Unpaid</p>
+                  <p className="text-sm text-[#707070]">Gcash - Delivery</p>
                 </div>
               </div>
             </div>
@@ -86,41 +91,86 @@ const Order = () => {
           <div className="modal-box p-5">
             <h1 className="text-lg font-bold">Add Order</h1>
             <div className="divider m-0 p-0"></div>
-            <div className="mt-2">
-              <div className="label">
-                <span className="label-text">Date</span>
-              </div>
-              {/* <input
-                type="text"
-                className="input input-bordered input-md w-full"
-              /> */}
-              <DateTimeField
-                className="w-full"
-                clearable={true}
-                disablePast={true}
-                sx={{
-                  width: "100%",
-                  ".MuiInputBase-input": {
-                    letterSpacing: 0.5,
-                    fontFamily: "segoe ui",
-                  },
-                  ".MuiInputBase-root": {
-                    borderRadius: 2,
-                    height: 48,
-                    background: "white",
-                  },
-                }}
-              />
-            </div>
-            <div className="modal-action">
-              <form method="dialog" className="flex gap-2">
-                <div
-                  tabIndex={0}
-                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                >
-                  add
+            {addOrderStep === 1 && (
+              <>
+                <div className="label">
+                  <span className="label-text">Date</span>
                 </div>
-                <button className="btn border-none">cancel</button>
+                <DateTimeField
+                  className="w-full"
+                  clearable={true}
+                  disablePast={true}
+                  sx={{
+                    width: "100%",
+                    ".MuiInputBase-input": {
+                      letterSpacing: 0.5,
+                      fontFamily: "Segoe ui",
+                      fontSize: 15,
+                    },
+                    ".MuiInputBase-root": {
+                      borderRadius: 2,
+                      height: 48,
+                      background: "white",
+                    },
+                  }}
+                />
+              </>
+            )}
+            {addOrderStep === 2 && (
+              <>
+                <div className="label">
+                  <span className="label-text">Costumer</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search using name or contact number"
+                  className="input input-bordered input-md w-full"
+                />
+              </>
+            )}
+            {addOrderStep === 3 && (
+              <>
+                <div className="label">
+                  <span className="label-text">Order</span>
+                </div>
+                <select className="select select-bordered w-full ">
+                  <option disabled selected>
+                    Item
+                  </option>
+                  <option>Empanada</option>
+                  <option>Kutsinta</option>
+                </select>
+              </>
+            )}
+            <div className="modal-action">
+              <form
+                method="dialog"
+                className="flex w-full justify-between gap-2"
+              >
+                <button
+                  className="btn border-none"
+                  onClick={() => setAddOrderStep(1)}
+                >
+                  cancel
+                </button>
+                <div className="flex gap-2">
+                  {addOrderStep > 1 && (
+                    <div
+                      tabIndex={0}
+                      className="btn border-none"
+                      onClick={() => setAddOrderStep(addOrderStep - 1)}
+                    >
+                      back
+                    </div>
+                  )}
+                  <div
+                    tabIndex={0}
+                    className="btn border-none bg-yellow-200 hover:bg-yellow-300"
+                    onClick={() => setAddOrderStep(addOrderStep + 1)}
+                  >
+                    next
+                  </div>
+                </div>
               </form>
             </div>
           </div>

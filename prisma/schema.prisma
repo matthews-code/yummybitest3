@@ -90,6 +90,7 @@ model orders {
   payment_status    Paymemt_status? @default(Unpaid)
   payment_mode      Payment_mode?
   payment_amount    Decimal?     @db.Decimal(15, 3)
+  delivery_mode     Delivery_mode
   note              String?
   user_uid          String?      @db.Uuid
   item_order        item_order[]
@@ -113,7 +114,6 @@ enum Role {
 
 enum Paymemt_status {
   Paid
-  Partial
   Unpaid
 }
 
@@ -121,4 +121,9 @@ enum Payment_mode {
   Gcash
   Cash
   BPI
+}
+
+enum Delivery_mode {
+  Pickup
+  Deliver
 }

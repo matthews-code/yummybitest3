@@ -264,9 +264,9 @@ const Users = () => {
 
         <dialog id="add_user_modal" className="modal modal-top sm:modal-middle">
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Add User</h1>
+            <h1 className="text-lg font-bold">Add Costumer</h1>
             <div className="divider m-0 p-0"></div>
-            <div className="mt-2 flex gap-4">
+            <div className="flex gap-4">
               <div className="w-full">
                 <div className="label">
                   <span className="label-text">First name</span>
@@ -350,6 +350,7 @@ const Users = () => {
             </div>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
+                <button className="btn border-none">cancel</button>
                 <div
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
@@ -365,7 +366,6 @@ const Users = () => {
                 >
                   add
                 </div>
-                <button className="btn border-none">cancel</button>
               </form>
             </div>
           </div>
@@ -378,7 +378,7 @@ const Users = () => {
           className="modal modal-top sm:modal-middle"
         >
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Edit User</h1>
+            <h1 className="text-lg font-bold">Edit Costumer</h1>
             <div className="divider m-0 p-0"></div>
             <div className="mt-2 flex gap-4">
               <div className="w-full">
@@ -463,21 +463,6 @@ const Users = () => {
             </div>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
-                <div
-                  tabIndex={0}
-                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={() =>
-                    editUser(
-                      userFirstName,
-                      userLastName,
-                      userContactNum,
-                      userAddress,
-                      false,
-                    )
-                  }
-                >
-                  save
-                </div>
                 <button
                   className="btn border-none"
                   onClick={() => {
@@ -500,6 +485,21 @@ const Users = () => {
                 >
                   cancel
                 </button>
+                <div
+                  tabIndex={0}
+                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
+                  onClick={() =>
+                    editUser(
+                      userFirstName,
+                      userLastName,
+                      userContactNum,
+                      userAddress,
+                      false,
+                    )
+                  }
+                >
+                  save
+                </div>
               </form>
             </div>
           </div>
@@ -512,21 +512,21 @@ const Users = () => {
           className="modal modal-top sm:modal-middle"
         >
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Delete Item</h1>
+            <h1 className="text-lg font-bold">Delete Costumer</h1>
             <div className="divider m-0 p-0"></div>
             <p>
               Are you sure you want to delete <b>{userFirstName}</b>?
             </p>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
+                <button className="btn border-none" onClick={clearStates}>
+                  cancel
+                </button>
                 <button
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
                   onClick={deleteUser}
                 >
                   delete
-                </button>
-                <button className="btn border-none" onClick={clearStates}>
-                  cancel
                 </button>
               </form>
             </div>

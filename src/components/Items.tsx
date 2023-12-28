@@ -268,6 +268,7 @@ const Items = () => {
             </div>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
+                <button className="btn border-none">cancel</button>
                 <div
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
@@ -277,7 +278,6 @@ const Items = () => {
                 >
                   add
                 </div>
-                <button className="btn border-none">cancel</button>
               </form>
             </div>
           </div>
@@ -355,15 +355,6 @@ const Items = () => {
             </div>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
-                <div
-                  tabIndex={0}
-                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={() =>
-                    editItem(itemName, itemPrice, itemInventory, false)
-                  }
-                >
-                  save
-                </div>
                 <button
                   className="btn border-none"
                   onClick={() => {
@@ -378,6 +369,15 @@ const Items = () => {
                 >
                   cancel
                 </button>
+                <div
+                  tabIndex={0}
+                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
+                  onClick={() =>
+                    editItem(itemName, itemPrice, itemInventory, false)
+                  }
+                >
+                  save
+                </div>
               </form>
             </div>
           </div>
@@ -397,14 +397,14 @@ const Items = () => {
             </p>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
+                <button className="btn border-none" onClick={clearStates}>
+                  cancel
+                </button>
                 <button
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
                   onClick={deleteItem}
                 >
                   delete
-                </button>
-                <button className="btn border-none" onClick={clearStates}>
-                  cancel
                 </button>
               </form>
             </div>
