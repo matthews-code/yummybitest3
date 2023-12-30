@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ setPage }) => {
                 <p onClick={() => setPage("orders")}>Orders</p>
               </li>
               <li tabIndex={0}>
-                <p onClick={() => setPage("users")}>Costumers</p>
+                <p onClick={() => setPage("users")}>Customers</p>
               </li>
               <li tabIndex={0}>
                 <p onClick={() => setPage("items")}>Items</p>

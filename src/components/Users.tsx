@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Role } from "@prisma/client";
@@ -264,7 +264,7 @@ const Users = () => {
 
         <dialog id="add_user_modal" className="modal modal-top sm:modal-middle">
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Add Costumer</h1>
+            <h1 className="text-lg font-bold">Add Customer</h1>
             <div className="divider m-0 p-0"></div>
             <div className="flex gap-4">
               <div className="w-full">
@@ -378,7 +378,7 @@ const Users = () => {
           className="modal modal-top sm:modal-middle"
         >
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Edit Costumer</h1>
+            <h1 className="text-lg font-bold">Edit Customer</h1>
             <div className="divider m-0 p-0"></div>
             <div className="mt-2 flex gap-4">
               <div className="w-full">
@@ -512,7 +512,7 @@ const Users = () => {
           className="modal modal-top sm:modal-middle"
         >
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Delete Costumer</h1>
+            <h1 className="text-lg font-bold">Delete Customer</h1>
             <div className="divider m-0 p-0"></div>
             <p>
               Are you sure you want to delete <b>{userFirstName}</b>?

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { api } from "~/utils/api";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { DateTimeField } from "@mui/x-date-pickers/DateTimeField";
 import dayjs, { Dayjs } from "dayjs";
@@ -7,17 +8,40 @@ import { FaPlus } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { MdDelete, MdEdit } from "react-icons/md";
 
-// const enum sample {
-//   DATE = 1,
-//   COSTUMER = "costumer",
-//   ORDER = "order",
-// }
-
 const Order = () => {
   const role = useSession().data?.user.role;
 
-  const [date, setDate] = useState(Date());
+  const invalidDateText = useRef<HTMLParagraphElement>(null);
+
+  const [currDate, setCurrDate] = useState(dayjs().toISOString());
+  const [addDate, setAddDate] = useState<string>();
   const [addOrderStep, setAddOrderStep] = useState(1);
+
+  const { data: users, refetch: refetchUsers } =
+    api.user.getAllUsers.useQuery();
+
+  const errorRouter = () => {
+    if (addOrderStep === 1) {
+      checkErrorDate();
+    }
+
+    if (addOrderStep === 2) {
+    }
+
+    if (addOrderStep === 3) {
+    }
+
+    if (addOrderStep === 4) {
+    }
+  };
+
+  const checkErrorDate = () => {
+    if (addDate !== undefined) {
+      setAddOrderStep(addOrderStep + 1);
+    } else {
+      invalidDateText.current?.classList.remove("hidden");
+    }
+  };
 
   return (
     <div className="flex justify-center">
@@ -38,7 +62,7 @@ const Order = () => {
               background: "white",
             },
           }}
-          value={dayjs(date)}
+          value={dayjs(currDate)}
           onChange={(value: Dayjs | null) => {
             console.log(value?.toDate());
           }}
@@ -94,12 +118,23 @@ const Order = () => {
             {addOrderStep === 1 && (
               <>
                 <div className="label">
-                  <span className="label-text">Date</span>
+                  <span className="label-text">
+                    Date{" "}
+                    <i ref={invalidDateText} className="hidden text-red-600">
+                      (invalid date)
+                    </i>
+                  </span>
                 </div>
                 <DateTimeField
                   className="w-full"
+                  value={addDate === undefined ? null : dayjs(addDate)}
                   clearable={true}
                   disablePast={true}
+                  slotProps={{
+                    textField: {
+                      error: false,
+                    },
+                  }}
                   sx={{
                     width: "100%",
                     ".MuiInputBase-input": {
@@ -113,33 +148,118 @@ const Order = () => {
                       background: "white",
                     },
                   }}
+                  onChange={(value: Dayjs | null) => {
+                    if (value) {
+                      value?.isValid()
+                        ? setAddDate(value.toDate().toISOString())
+                        : null;
+                    } else {
+                      setAddDate(undefined);
+                    }
+                    invalidDateText.current?.classList.add("hidden");
+                  }}
                 />
               </>
             )}
             {addOrderStep === 2 && (
               <>
                 <div className="label">
-                  <span className="label-text">Costumer</span>
+                  <span className="label-text">Customer</span>
                 </div>
                 <input
                   type="text"
                   placeholder="Search using name or contact number"
-                  className="input input-bordered input-md w-full"
+                  className="input input-bordered input-md w-full rounded-b-none"
                 />
+                <div className="max-h-36 overflow-y-auto rounded-b-lg border border-t-0 border-gray-300">
+                  {users?.map((user) => (
+                    <div
+                      key={user.user_uid}
+                      className="flex justify-between p-2 hover:bg-slate-50"
+                    >
+                      <p className="text-sm">
+                        {user.first_name} {user.last_name}
+                      </p>
+                      <p className="text-sm">{user.contact_num}</p>
+                    </div>
+                  ))}
+                </div>
               </>
             )}
             {addOrderStep === 3 && (
               <>
-                <div className="label">
-                  <span className="label-text">Order</span>
+                <div className="flex gap-4">
+                  <div className="w-full">
+                    <div className="label">
+                      <span className="label-text">Order</span>
+                    </div>
+                    <select className="select select-bordered w-full ">
+                      <option disabled selected>
+                        Item
+                      </option>
+                      <option>Chocolate Cheesecake</option>
+                      <option>Kutsinta</option>
+                    </select>
+                  </div>
+                  <div className="w-full">
+                    <div className="label">
+                      <span className="label-text">Quantity</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="50"
+                      className="input input-bordered input-md w-full"
+                    />
+                  </div>
                 </div>
-                <select className="select select-bordered w-full ">
-                  <option disabled selected>
-                    Item
-                  </option>
-                  <option>Empanada</option>
-                  <option>Kutsinta</option>
-                </select>
+                <div className="mt-2">
+                  <button className="btn btn-sm w-full border-none bg-yellow-200 ">
+                    add item
+                  </button>
+                </div>
+                <div className="divider my-3"></div>
+              </>
+            )}
+            {addOrderStep === 4 && (
+              <>
+                <div className="flex gap-4">
+                  <div className="w-full">
+                    <div className="label">
+                      <span className="label-text">Order</span>
+                    </div>
+                    <select className="select select-bordered w-full ">
+                      <option disabled selected>
+                        Payment mode
+                      </option>
+                      <option>Cash</option>
+                      <option>Gcash</option>
+                      <option>BPI</option>
+                    </select>
+                  </div>
+                  <div className="w-full">
+                    <div className="label">
+                      <span className="label-text">Quantity</span>
+                    </div>
+                    <select className="select select-bordered w-full ">
+                      <option disabled selected>
+                        Delivery mode
+                      </option>
+                      <option>Pickup</option>
+                      <option>Delivery</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <div className="label">
+                    <span className="label-text">
+                      Notes - <i className="text-sm">Optional</i>
+                    </span>
+                  </div>
+                  <textarea
+                    className="textarea textarea-bordered w-full"
+                    placeholder="Additional notes"
+                  ></textarea>
+                </div>
               </>
             )}
             <div className="modal-action">
@@ -166,9 +286,9 @@ const Order = () => {
                   <div
                     tabIndex={0}
                     className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                    onClick={() => setAddOrderStep(addOrderStep + 1)}
+                    onClick={errorRouter}
                   >
-                    next
+                    {addOrderStep === 4 ? "add" : "next"}
                   </div>
                 </div>
               </form>
