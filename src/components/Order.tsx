@@ -12,6 +12,11 @@ const Order = () => {
   const role = useSession().data?.user.role;
 
   const invalidDateText = useRef<HTMLParagraphElement>(null);
+  const userSearchInput = useRef<HTMLInputElement>(null);
+  const costumerSearchDiv = useRef<HTMLDivElement>(null);
+
+  const [costumerSearch, setCostumerSearch] = useState<string>("");
+  const [selectedCostumer, setSelectedCostumer] = useState<string>();
 
   const [currDate, setCurrDate] = useState(dayjs().toISOString());
   const [addDate, setAddDate] = useState<string>();
@@ -26,6 +31,7 @@ const Order = () => {
     }
 
     if (addOrderStep === 2) {
+      checkErrorCostumer();
     }
 
     if (addOrderStep === 3) {
@@ -43,6 +49,16 @@ const Order = () => {
     }
   };
 
+  const checkErrorCostumer = () => {
+    if (selectedCostumer !== undefined) {
+      console.log(`Selected date: ${addDate}`);
+      console.log(`Selected costumer's mobile number: ${selectedCostumer}`);
+      console.log(`Please proceed`);
+      setAddOrderStep(addOrderStep + 1);
+    } else {
+    }
+  };
+
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
@@ -54,7 +70,7 @@ const Order = () => {
             ".MuiInputBase-input": {
               letterSpacing: 0.5,
               textAlign: "center",
-              fontFamily: "Segoe ui",
+              // fontFamily: "Segoe ui",
             },
             ".MuiInputBase-root": {
               borderRadius: 2,
@@ -139,8 +155,8 @@ const Order = () => {
                     width: "100%",
                     ".MuiInputBase-input": {
                       letterSpacing: 0.5,
-                      fontFamily: "Segoe ui",
                       fontSize: 15,
+                      // fontFamily: "Segoe ui",
                     },
                     ".MuiInputBase-root": {
                       borderRadius: 2,
@@ -168,21 +184,71 @@ const Order = () => {
                 </div>
                 <input
                   type="text"
+                  ref={userSearchInput}
                   placeholder="Search using name or contact number"
-                  className="input input-bordered input-md w-full rounded-b-none"
+                  value={costumerSearch}
+                  className="z-1 input input-bordered input-md w-full"
+                  onChange={(e) => {
+                    setCostumerSearch(e.currentTarget.value);
+                    costumerSearchDiv.current?.classList.remove("hidden");
+                  }}
                 />
-                <div className="max-h-36 overflow-y-auto rounded-b-lg border border-t-0 border-gray-300">
-                  {users?.map((user) => (
-                    <div
-                      key={user.user_uid}
-                      className="flex justify-between p-2 hover:bg-slate-50"
-                    >
-                      <p className="text-sm">
-                        {user.first_name} {user.last_name}
-                      </p>
-                      <p className="text-sm">{user.contact_num}</p>
-                    </div>
-                  ))}
+                <div
+                  ref={costumerSearchDiv}
+                  className="hidden max-h-36 overflow-y-auto rounded-b-lg border border-t-0 border-gray-300"
+                >
+                  {costumerSearch !== "" &&
+                    users
+                      ?.filter((user) => {
+                        if (
+                          user.first_name
+                            .toLowerCase()
+                            .startsWith(costumerSearch.toLowerCase())
+                        ) {
+                          return true;
+                        }
+                        if (
+                          user.last_name
+                            ?.toLowerCase()
+                            .startsWith(costumerSearch.toLowerCase())
+                        ) {
+                          return true;
+                        }
+                        if (
+                          `${user.first_name.toLowerCase()} ${user.last_name?.toLowerCase()}`.startsWith(
+                            costumerSearch.toLowerCase(),
+                          )
+                        ) {
+                          return true;
+                        }
+                        if (user.contact_num.startsWith(costumerSearch)) {
+                          return true;
+                        }
+
+                        return false;
+                      })
+                      .map((user) => {
+                        return (
+                          <div
+                            key={user.user_uid}
+                            className="flex justify-between px-4 py-2 focus:bg-slate-50"
+                            onClick={() => {
+                              setSelectedCostumer(user.contact_num);
+                              setCostumerSearch(
+                                `${user.first_name} ${user.last_name}`,
+                              );
+                              costumerSearchDiv.current?.classList.add(
+                                "hidden",
+                              );
+                            }}
+                          >
+                            <p className="text-sm">
+                              {user.first_name} {user.last_name}
+                            </p>
+                            <p className="text-sm">{user.contact_num}</p>
+                          </div>
+                        );
+                      })}
                 </div>
               </>
             )}
@@ -193,12 +259,17 @@ const Order = () => {
                     <div className="label">
                       <span className="label-text">Order</span>
                     </div>
-                    <select className="select select-bordered w-full ">
-                      <option disabled selected>
+                    <select
+                      defaultValue={"item"}
+                      className="select select-bordered w-full "
+                    >
+                      <option disabled value={"item"}>
                         Item
                       </option>
-                      <option>Chocolate Cheesecake</option>
-                      <option>Kutsinta</option>
+                      <option value={"chocolate cheesecake"}>
+                        Chocolate Cheesecake
+                      </option>
+                      <option value={"kutsinta"}>Kutsinta</option>
                     </select>
                   </div>
                   <div className="w-full">
@@ -278,7 +349,9 @@ const Order = () => {
                     <div
                       tabIndex={0}
                       className="btn border-none"
-                      onClick={() => setAddOrderStep(addOrderStep - 1)}
+                      onClick={() => {
+                        setAddOrderStep(addOrderStep - 1);
+                      }}
                     >
                       back
                     </div>
