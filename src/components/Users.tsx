@@ -55,6 +55,7 @@ const Users = () => {
     setUserLastName("");
     setUserContactNum("");
     setUserAddress("");
+    setUserUid("");
   };
 
   const checkErrors = (

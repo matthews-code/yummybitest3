@@ -8,22 +8,38 @@ import { FaPlus } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { MdDelete, MdEdit } from "react-icons/md";
 
+interface itemOrder {
+  itemName: string;
+  quantity: number;
+}
+
 const Order = () => {
   const role = useSession().data?.user.role;
 
   const invalidDateText = useRef<HTMLParagraphElement>(null);
   const userSearchInput = useRef<HTMLInputElement>(null);
   const costumerSearchDiv = useRef<HTMLDivElement>(null);
+  const itemQuantityInput = useRef<HTMLInputElement>(null);
+
+  const [addOrderStep, setAddOrderStep] = useState(1);
 
   const [costumerSearch, setCostumerSearch] = useState<string>("");
   const [selectedCostumer, setSelectedCostumer] = useState<string>();
 
   const [currDate, setCurrDate] = useState(dayjs().toISOString());
   const [addDate, setAddDate] = useState<string>();
-  const [addOrderStep, setAddOrderStep] = useState(1);
+
+  const [itemUid, setItemUid] = useState<string>("");
+  const [itemQuantity, setItemQuantity] = useState<string>("");
+  const [selectedItem, setSelectedItem] = useState<string>("");
+
+  const [itemOrders, setItemOrders] = useState<itemOrder[]>([]);
 
   const { data: users, refetch: refetchUsers } =
     api.user.getAllUsers.useQuery();
+
+  const { data: items, refetch: refetchItems } =
+    api.item.getAllItems.useQuery();
 
   const errorRouter = () => {
     if (addOrderStep === 1) {
@@ -55,8 +71,32 @@ const Order = () => {
       console.log(`Selected costumer's mobile number: ${selectedCostumer}`);
       console.log(`Please proceed`);
       setAddOrderStep(addOrderStep + 1);
-    } else {
     }
+  };
+
+  const checkAddItem = () => {
+    if (selectedItem === "") {
+      return;
+    }
+
+    if (itemOrders.some((itemOrder) => itemOrder.itemName === selectedItem)) {
+      return;
+    }
+
+    if (itemQuantity === "" || !/^\d*$/.test(itemQuantity)) {
+      itemQuantityInput.current?.classList.add("input-error");
+      return;
+    }
+
+    setItemOrders([
+      ...itemOrders,
+      {
+        itemName: selectedItem,
+        quantity: Number(itemQuantity),
+      },
+    ]);
+
+    // console.log(itemOrders);
   };
 
   return (
@@ -261,15 +301,21 @@ const Order = () => {
                     </div>
                     <select
                       defaultValue={"item"}
-                      className="select select-bordered w-full "
+                      className="select select-bordered w-full"
+                      onChange={(e) => setSelectedItem(e.currentTarget.value)}
                     >
                       <option disabled value={"item"}>
                         Item
                       </option>
-                      <option value={"chocolate cheesecake"}>
-                        Chocolate Cheesecake
-                      </option>
-                      <option value={"kutsinta"}>Kutsinta</option>
+                      {items?.map((item) => (
+                        <option
+                          key={item.item_uid}
+                          value={item.name}
+                          onClick={() => setItemUid(item.item_uid)}
+                        >
+                          {item.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="w-full">
@@ -277,18 +323,67 @@ const Order = () => {
                       <span className="label-text">Quantity</span>
                     </div>
                     <input
+                      ref={itemQuantityInput}
                       type="text"
                       placeholder="50"
                       className="input input-bordered input-md w-full"
+                      onChange={(e) => {
+                        setItemQuantity(e.currentTarget.value);
+                        if (!/^\d*$/.test(e.currentTarget.value)) {
+                          itemQuantityInput.current?.classList.add(
+                            "input-error",
+                          );
+                        } else {
+                          itemQuantityInput.current?.classList.remove(
+                            "input-error",
+                          );
+                        }
+                      }}
                     />
                   </div>
                 </div>
                 <div className="mt-2">
-                  <button className="btn btn-sm w-full border-none bg-yellow-200 ">
+                  <button
+                    className="btn btn-sm w-full border-none bg-yellow-200"
+                    onClick={checkAddItem}
+                  >
                     add item
                   </button>
                 </div>
-                <div className="divider my-3"></div>
+                {itemOrders.length > 0 && (
+                  <>
+                    <div className="divider my-3"></div>
+                    <div className="mt-3 flex flex-col gap-1">
+                      {itemOrders.map((itemOrder) => (
+                        <div
+                          key={itemOrder.itemName}
+                          className="flex justify-between"
+                        >
+                          <p className="text-sm">{itemOrder.itemName}</p>
+                          <div className="flex gap-4">
+                            <p className="text-sm text-[#707070]">
+                              {itemOrder.quantity}
+                            </p>
+                            <button
+                              onClick={() => {
+                                setItemOrders(
+                                  itemOrders.filter((newItemOrder) => {
+                                    return (
+                                      newItemOrder.itemName !==
+                                      itemOrder.itemName
+                                    );
+                                  }),
+                                );
+                              }}
+                            >
+                              <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </>
             )}
             {addOrderStep === 4 && (

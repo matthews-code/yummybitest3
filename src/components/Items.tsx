@@ -13,6 +13,9 @@ const Items = () => {
   const itemPriceInput = useRef<HTMLInputElement>(null);
   const itemInventoryInput = useRef<HTMLInputElement>(null);
 
+  const duplicateNameText = useRef<HTMLParagraphElement>(null);
+  const editDuplicateNameText = useRef<HTMLParagraphElement>(null);
+
   const editItemNameInput = useRef<HTMLInputElement>(null);
   const editItemPriceInput = useRef<HTMLInputElement>(null);
   const editItemInventoryInput = useRef<HTMLInputElement>(null);
@@ -47,6 +50,7 @@ const Items = () => {
     setItemName("");
     setItemPrice("");
     setItemInventory("");
+    setItemUid("");
   };
 
   const checkErrors = (
@@ -66,6 +70,15 @@ const Items = () => {
       addItem
         ? itemPriceInput.current?.classList.add("input-error")
         : editItemPriceInput.current?.classList.add("input-error");
+      return false;
+    }
+
+    if (
+      items?.some((item) => item.name === name && item.item_uid !== itemUid)
+    ) {
+      addItem
+        ? duplicateNameText.current?.classList.remove("hidden")
+        : editDuplicateNameText.current?.classList.remove("hidden");
       return false;
     }
 
@@ -204,7 +217,12 @@ const Items = () => {
             <h1 className="text-lg font-bold">Add Item</h1>
             <div className="divider m-0 p-0"></div>
             <div className="label">
-              <span className="label-text">Name</span>
+              <span className="label-text">
+                Name{" "}
+                <i ref={duplicateNameText} className="hidden text-red-600">
+                  (name is already taken)
+                </i>
+              </span>
             </div>
             <input
               id="item-name-input"
@@ -216,6 +234,8 @@ const Items = () => {
               onChange={(e) => {
                 setItemName(e.currentTarget.value);
                 itemNameInput.current?.classList.remove("input-error");
+
+                duplicateNameText.current?.classList.add("hidden");
               }}
             />
             <div className="mt-2 flex gap-4">
@@ -293,7 +313,12 @@ const Items = () => {
             <h1 className="text-lg font-bold">Edit Item</h1>
             <div className="divider m-0 p-0"></div>
             <div className="label">
-              <span className="label-text">Name</span>
+              <span className="label-text">
+                Name{" "}
+                <i ref={editDuplicateNameText} className="hidden text-red-600">
+                  (name is already taken)
+                </i>
+              </span>
             </div>
             <input
               id="edit-name-input"
@@ -303,6 +328,8 @@ const Items = () => {
               onChange={(e) => {
                 setItemName(e.currentTarget.value);
                 editItemNameInput.current?.classList.remove("input-error");
+
+                editDuplicateNameText.current?.classList.add("hidden");
               }}
             />
             <div className="mt-2 flex gap-4">
@@ -363,6 +390,8 @@ const Items = () => {
                     editItemInventoryInput.current?.classList.remove(
                       "input-error",
                     );
+
+                    editDuplicateNameText.current?.classList.add("hidden");
 
                     clearStates();
                   }}
