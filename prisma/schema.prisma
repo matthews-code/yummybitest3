@@ -89,7 +89,6 @@ model orders {
   amount_due        Decimal      @db.Decimal(15, 3)
   payment_status    Paymemt_status? @default(Unpaid)
   payment_mode      Payment_mode?
-  payment_amount    Decimal?     @db.Decimal(15, 3)
   delivery_mode     Delivery_mode
   note              String?
   user_uid          String?      @db.Uuid
@@ -125,5 +124,5 @@ enum Payment_mode {
 
 enum Delivery_mode {
   Pickup
-  Deliver
+  Delivery
 }

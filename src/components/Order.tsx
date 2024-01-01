@@ -3,13 +3,15 @@ import { api } from "~/utils/api";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { DateTimeField } from "@mui/x-date-pickers/DateTimeField";
 import dayjs, { Dayjs } from "dayjs";
-import { Role } from "@prisma/client";
+import { Delivery_mode, Payment_mode, Role } from "@prisma/client";
 import { FaPlus } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { MdDelete, MdEdit } from "react-icons/md";
 
 interface itemOrder {
+  itemUid: string;
   itemName: string;
+  itemPrice: string;
   quantity: number;
 }
 
@@ -23,6 +25,7 @@ const Order = () => {
 
   const [addOrderStep, setAddOrderStep] = useState(1);
 
+  const [costumerUid, setCostumerUid] = useState<string>("");
   const [costumerSearch, setCostumerSearch] = useState<string>("");
   const [selectedCostumer, setSelectedCostumer] = useState<string>();
 
@@ -30,16 +33,45 @@ const Order = () => {
   const [addDate, setAddDate] = useState<string>();
 
   const [itemUid, setItemUid] = useState<string>("");
+  const [itemPrice, setItemPrice] = useState<string>("");
   const [itemQuantity, setItemQuantity] = useState<string>("");
   const [selectedItem, setSelectedItem] = useState<string>("");
 
+  const [paymentMode, setPaymentMode] = useState<string>(Payment_mode.Cash);
+  const [deliveryMode, setDeliveryMode] = useState<string>(
+    Delivery_mode.Pickup,
+  );
+
+  const [addNotes, setAddNotes] = useState<string>("");
+
   const [itemOrders, setItemOrders] = useState<itemOrder[]>([]);
+
+  const { data: orders, refetch: refetchOrders } =
+    api.order.getAllOrders.useQuery();
 
   const { data: users, refetch: refetchUsers } =
     api.user.getAllUsers.useQuery();
 
   const { data: items, refetch: refetchItems } =
     api.item.getAllItems.useQuery();
+
+  const addOrderEndpoint = api.order.createOrder.useMutation({
+    onSuccess: () => {
+      void refetchOrders();
+    },
+  });
+
+  const clearStates = () => {
+    setAddDate(undefined);
+    setSelectedCostumer(undefined);
+    setItemOrders([]);
+    setPaymentMode("Cash");
+    setDeliveryMode("Pickup");
+    setAddNotes("");
+    setCostumerSearch("");
+    setCostumerUid("");
+    setItemUid("");
+  };
 
   const errorRouter = () => {
     if (addOrderStep === 1) {
@@ -51,9 +83,11 @@ const Order = () => {
     }
 
     if (addOrderStep === 3) {
+      checkItemOrders();
     }
 
     if (addOrderStep === 4) {
+      addOrder();
     }
   };
 
@@ -67,9 +101,12 @@ const Order = () => {
 
   const checkErrorCostumer = () => {
     if (selectedCostumer !== undefined) {
-      console.log(`Selected date: ${addDate}`);
-      console.log(`Selected costumer's mobile number: ${selectedCostumer}`);
-      console.log(`Please proceed`);
+      setAddOrderStep(addOrderStep + 1);
+    }
+  };
+
+  const checkItemOrders = () => {
+    if (itemOrders.length > 0) {
       setAddOrderStep(addOrderStep + 1);
     }
   };
@@ -91,12 +128,43 @@ const Order = () => {
     setItemOrders([
       ...itemOrders,
       {
+        itemUid: itemUid,
         itemName: selectedItem,
+        itemPrice: itemPrice,
         quantity: Number(itemQuantity),
       },
     ]);
+  };
 
-    // console.log(itemOrders);
+  function isPaymentMode(mode: string): mode is "Gcash" | "Cash" | "BPI" {
+    return ["Gcash", "Cash", "BPI"].includes(mode);
+  }
+
+  function isDeliveryMode(mode: string): mode is "Pickup" | "Deliver" {
+    return ["Pickup", "Deliver"].includes(mode);
+  }
+
+  const addOrder = () => {
+    console.log(isPaymentMode(paymentMode));
+    console.log(isDeliveryMode(deliveryMode));
+
+    Payment_mode;
+
+    addOrderEndpoint.mutate({
+      date: addDate ? addDate : "",
+      amount_due: itemOrders.reduce(
+        (sum, itemOrder) =>
+          sum + Number(itemOrder.itemPrice) * itemOrder.quantity,
+        0,
+      ),
+      payment_mode: paymentMode as "Gcash" | "BPI" | "Cash",
+      delivery_mode: deliveryMode as "Delivery" | "Pickup",
+      note: addNotes,
+      user_uid: costumerUid,
+      item_order: itemOrders.map((itemOrder) => {
+        return { item_uid: itemOrder.itemUid, quantity: itemOrder.quantity };
+      }),
+    });
   };
 
   return (
@@ -125,43 +193,90 @@ const Order = () => {
         />
 
         <div className="mt-4 flex flex-col gap-3">
-          <div className="collapse z-0 bg-white shadow-md">
-            <input type="checkbox" />
-            <div className="collapse-title p-4">
-              <div className="flex justify-between">
-                <div>
-                  <h1 className="text-lg font-medium">Jose Dela Cruz</h1>
-                  <p className="text-sm text-[#707070]">09177951792</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-medium">₱1200 Unpaid</p>
-                  <p className="text-sm text-[#707070]">Gcash - Delivery</p>
+          {orders?.map((order) => (
+            <div
+              key={order.order_uid}
+              className="collapse z-0 bg-white shadow-md"
+            >
+              <input type="checkbox" />
+              <div className="collapse-title p-4">
+                <div className="flex justify-between">
+                  <div>
+                    <h1 className="text-lg font-medium">
+                      {
+                        users?.find((user) => {
+                          return order.user_uid === user.user_uid;
+                        })?.first_name
+                      }{" "}
+                      {
+                        users?.find((user) => {
+                          return order.user_uid === user.user_uid;
+                        })?.last_name
+                      }
+                    </h1>
+                    <p className="text-sm text-[#707070]">
+                      {
+                        users?.find((user) => {
+                          return order.user_uid === user.user_uid;
+                        })?.contact_num
+                      }
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-medium">
+                      {`₱${order.amount_due.toString()}`}
+                      {` ${order.payment_status}`}
+                    </p>
+                    <p className="text-sm text-[#707070]">
+                      {`${order.payment_mode}`}
+                      {` - ${order.delivery_mode}`}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="collapse-content bg-white">
-              <div className="divider my-[-0.5rem]"></div>
-              <div className="mt-4 flex flex-col gap-1">
-                <div className="flex justify-between">
-                  <p className="text-sm">Chocolate Cheesecake</p>
-                  <p className="text-sm text-[#707070]">1 pc.</p>
+              <div className="collapse-content bg-white">
+                <div className="divider my-[-0.5rem]"></div>
+                <div className="mt-4 flex flex-col gap-1">
+                  {order.item_order.map((itemOrder) => (
+                    <div
+                      key={itemOrder.item_uid}
+                      className="flex justify-between"
+                    >
+                      <p className="text-sm">
+                        {
+                          items?.find((item) => {
+                            return itemOrder.item_uid === item.item_uid;
+                          })?.name
+                        }
+                      </p>
+                      <p className="text-sm text-[#707070]">
+                        {`${itemOrder.quantity}`}{" "}
+                        {itemOrder.quantity > 1 ? "pcs." : "pc."}
+                      </p>
+                    </div>
+                  ))}
+                  {/* <div className="flex justify-between">
+                    <p className="text-sm">Chocolate Cheesecake</p>
+                    <p className="text-sm text-[#707070]">1 pc.</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <p className="text-sm">Pork Empanada</p>
+                    <p className="text-sm text-[#707070]">12 pcs.</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <p className="text-sm">Tuna Empanada</p>
+                    <p className="text-sm text-[#707070]">12 pcs.</p>
+                  </div> */}
                 </div>
-                <div className="flex justify-between">
-                  <p className="text-sm">Pork Empanada</p>
-                  <p className="text-sm text-[#707070]">12 pcs.</p>
-                </div>
-                <div className="flex justify-between">
-                  <p className="text-sm">Tuna Empanada</p>
-                  <p className="text-sm text-[#707070]">12 pcs.</p>
-                </div>
+                {order.note && (
+                  <>
+                    <div className="divider my-2"></div>
+                    <p className="text-sm text-[#707070]">{order.note}</p>
+                  </>
+                )}
               </div>
-              <div className="divider  my-2"></div>
-              <p className="text-sm text-[#707070]">
-                Please give it to the next door neighbor's helper, Anna. Address
-                is 514 Camachile street.
-              </p>
             </div>
-          </div>
+          ))}
         </div>
 
         <dialog
@@ -273,6 +388,7 @@ const Order = () => {
                             key={user.user_uid}
                             className="flex justify-between px-4 py-2 focus:bg-slate-50"
                             onClick={() => {
+                              setCostumerUid(user.user_uid);
                               setSelectedCostumer(user.contact_num);
                               setCostumerSearch(
                                 `${user.first_name} ${user.last_name}`,
@@ -302,17 +418,21 @@ const Order = () => {
                     <select
                       defaultValue={"item"}
                       className="select select-bordered w-full"
-                      onChange={(e) => setSelectedItem(e.currentTarget.value)}
+                      onChange={(e) => {
+                        setSelectedItem(e.currentTarget.value);
+                        const item = items?.find((item) => {
+                          return item.name === e.currentTarget.value;
+                        });
+
+                        setItemPrice(item ? item.price.toString() : "");
+                        setItemUid(item ? item.item_uid : "");
+                      }}
                     >
                       <option disabled value={"item"}>
                         Item
                       </option>
                       {items?.map((item) => (
-                        <option
-                          key={item.item_uid}
-                          value={item.name}
-                          onClick={() => setItemUid(item.item_uid)}
-                        >
+                        <option key={item.item_uid} value={item.name}>
                           {item.name}
                         </option>
                       ))}
@@ -353,16 +473,19 @@ const Order = () => {
                 {itemOrders.length > 0 && (
                   <>
                     <div className="divider my-3"></div>
-                    <div className="mt-3 flex flex-col gap-1">
+                    <div className="mt-3 flex flex-col gap-2">
                       {itemOrders.map((itemOrder) => (
                         <div
                           key={itemOrder.itemName}
                           className="flex justify-between"
                         >
-                          <p className="text-sm">{itemOrder.itemName}</p>
+                          <p className="text-sm">
+                            {itemOrder.itemName} • {itemOrder.quantity}{" "}
+                            {itemOrder.quantity > 1 ? "pcs." : "pc."}
+                          </p>
                           <div className="flex gap-4">
                             <p className="text-sm text-[#707070]">
-                              {itemOrder.quantity}
+                              {Number(itemOrder.itemPrice) * itemOrder.quantity}
                             </p>
                             <button
                               onClick={() => {
@@ -381,6 +504,19 @@ const Order = () => {
                           </div>
                         </div>
                       ))}
+                      <div className="divider my-[-0.4rem]"></div>
+                      <div className="mt-[-0.1rem] flex justify-between">
+                        <p className="text-base font-semibold">Total</p>
+                        <p className="mr-8 text-base font-semibold">
+                          ₱
+                          {itemOrders.reduce(
+                            (sum, itemOrder) =>
+                              sum +
+                              Number(itemOrder.itemPrice) * itemOrder.quantity,
+                            0,
+                          )}
+                        </p>
+                      </div>
                     </div>
                   </>
                 )}
@@ -391,27 +527,29 @@ const Order = () => {
                 <div className="flex gap-4">
                   <div className="w-full">
                     <div className="label">
-                      <span className="label-text">Order</span>
+                      <span className="label-text">Payment mode</span>
                     </div>
-                    <select className="select select-bordered w-full ">
-                      <option disabled selected>
-                        Payment mode
-                      </option>
-                      <option>Cash</option>
-                      <option>Gcash</option>
-                      <option>BPI</option>
+                    <select
+                      value={paymentMode}
+                      className="select select-bordered w-full"
+                      onChange={(e) => setPaymentMode(e.target.value)}
+                    >
+                      <option value={Payment_mode.Cash}>Cash</option>
+                      <option value={Payment_mode.Gcash}>Gcash</option>
+                      <option value={Payment_mode.BPI}>BPI</option>
                     </select>
                   </div>
                   <div className="w-full">
                     <div className="label">
-                      <span className="label-text">Quantity</span>
+                      <span className="label-text">Delivery mode</span>
                     </div>
-                    <select className="select select-bordered w-full ">
-                      <option disabled selected>
-                        Delivery mode
-                      </option>
-                      <option>Pickup</option>
-                      <option>Delivery</option>
+                    <select
+                      value={deliveryMode}
+                      className="select select-bordered w-full"
+                      onChange={(e) => setDeliveryMode(e.target.value)}
+                    >
+                      <option value={Delivery_mode.Pickup}>Pickup</option>
+                      <option value={Delivery_mode.Delivery}>Delivery</option>
                     </select>
                   </div>
                 </div>
@@ -424,6 +562,8 @@ const Order = () => {
                   <textarea
                     className="textarea textarea-bordered w-full"
                     placeholder="Additional notes"
+                    value={addNotes}
+                    onChange={(e) => setAddNotes(e.target.value)}
                   ></textarea>
                 </div>
               </>
@@ -435,7 +575,10 @@ const Order = () => {
               >
                 <button
                   className="btn border-none"
-                  onClick={() => setAddOrderStep(1)}
+                  onClick={() => {
+                    setAddOrderStep(1);
+                    clearStates();
+                  }}
                 >
                   cancel
                 </button>
