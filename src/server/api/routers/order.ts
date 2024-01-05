@@ -44,6 +44,19 @@ export const orderRouter = createTRPCRouter({
       });
     }),
 
+  togglePaid: adminRoleProcedure
+    .input(z.object({ order_uid: z.string(), paid: z.boolean() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.db.orders.update({
+        where: {
+          order_uid: input.order_uid,
+        },
+        data: {
+          paid: !input.paid,
+        },
+      });
+    }),
+
   getAllOrders: userRoleProcedure.query(({ ctx }) => {
     return ctx.db.orders.findMany({
       include: { item_order: true },

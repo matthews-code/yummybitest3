@@ -18,6 +18,8 @@ interface itemOrder {
 const Order = () => {
   const role = useSession().data?.user.role;
 
+  const utils = api.useUtils();
+
   const invalidDateText = useRef<HTMLParagraphElement>(null);
   const userSearchInput = useRef<HTMLInputElement>(null);
   const costumerSearchDiv = useRef<HTMLDivElement>(null);
@@ -58,6 +60,34 @@ const Order = () => {
   const addOrderEndpoint = api.order.createOrder.useMutation({
     onSuccess: () => {
       void refetchOrders();
+    },
+  });
+
+  const togglePaid = api.order.togglePaid.useMutation({
+    async onMutate(updatedOrder) {
+      await utils.order.getAllOrders.cancel();
+
+      const previousOrders = utils.order.getAllOrders.getData();
+
+      utils.order.getAllOrders.setData(
+        undefined,
+        (old) =>
+          old?.map((order) =>
+            order.order_uid === updatedOrder.order_uid
+              ? { ...order, paid: updatedOrder.paid }
+              : order,
+          ),
+      );
+
+      return { previousOrders };
+    },
+
+    onError: (err, updatedOrder, context) => {
+      utils.order.getAllOrders.setData(undefined, context?.previousOrders);
+    },
+
+    onSettled: async () => {
+      await utils.order.getAllOrders.invalidate();
     },
   });
 
@@ -148,8 +178,6 @@ const Order = () => {
     console.log(isPaymentMode(paymentMode));
     console.log(isDeliveryMode(deliveryMode));
 
-    Payment_mode;
-
     addOrderEndpoint.mutate({
       date: addDate ? addDate : "",
       amount_due: itemOrders.reduce(
@@ -164,6 +192,13 @@ const Order = () => {
       item_order: itemOrders.map((itemOrder) => {
         return { item_uid: itemOrder.itemUid, quantity: itemOrder.quantity };
       }),
+    });
+  };
+
+  const handleCheckboxClick = (orderId: string, paid: boolean) => {
+    togglePaid.mutate({
+      order_uid: orderId,
+      paid: paid,
     });
   };
 
@@ -219,17 +254,16 @@ const Order = () => {
                         users?.find((user) => {
                           return order.user_uid === user.user_uid;
                         })?.contact_num
-                      }
+                      }{" "}
+                      • {order.delivery_mode}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-medium">
                       {`₱${order.amount_due.toString()}`}
-                      {` ${order.payment_status}`}
                     </p>
                     <p className="text-sm text-[#707070]">
-                      {`${order.payment_mode}`}
-                      {` - ${order.delivery_mode}`}
+                      {order.payment_mode} • {order.paid ? "Paid" : "Unpaid"}
                     </p>
                   </div>
                 </div>
@@ -255,18 +289,6 @@ const Order = () => {
                       </p>
                     </div>
                   ))}
-                  {/* <div className="flex justify-between">
-                    <p className="text-sm">Chocolate Cheesecake</p>
-                    <p className="text-sm text-[#707070]">1 pc.</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <p className="text-sm">Pork Empanada</p>
-                    <p className="text-sm text-[#707070]">12 pcs.</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <p className="text-sm">Tuna Empanada</p>
-                    <p className="text-sm text-[#707070]">12 pcs.</p>
-                  </div> */}
                 </div>
                 {order.note && (
                   <>
@@ -274,6 +296,26 @@ const Order = () => {
                     <p className="text-sm text-[#707070]">{order.note}</p>
                   </>
                 )}
+                <div className="mt-6 flex justify-between">
+                  <div className="flex gap-2">
+                    <p className="self-center text-xs italic">
+                      Mark as {order.paid ? "unpaid" : "paid"}
+                    </p>
+                    <input
+                      type="checkbox"
+                      className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
+                      onClick={() =>
+                        handleCheckboxClick(order.order_uid, order.paid)
+                      }
+                      defaultChecked={order.paid}
+                      // checked={order.paid}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                    <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
