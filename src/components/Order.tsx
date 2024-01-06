@@ -3,10 +3,15 @@ import { api } from "~/utils/api";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { DateTimeField } from "@mui/x-date-pickers/DateTimeField";
 import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc";
+import tz from "dayjs/plugin/timezone";
 import { Delivery_mode, Payment_mode, Role } from "@prisma/client";
 import { FaPlus } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { MdDelete, MdEdit } from "react-icons/md";
+
+dayjs.extend(utc);
+dayjs.extend(tz);
 
 interface itemOrder {
   itemUid: string;
@@ -31,7 +36,7 @@ const Order = () => {
   const [costumerSearch, setCostumerSearch] = useState<string>("");
   const [selectedCostumer, setSelectedCostumer] = useState<string>();
 
-  const [currDate, setCurrDate] = useState(dayjs().toISOString());
+  const [currDate, setCurrDate] = useState(dayjs().toDate());
   const [addDate, setAddDate] = useState<string>();
 
   const [itemUid, setItemUid] = useState<string>("");
@@ -49,7 +54,9 @@ const Order = () => {
   const [itemOrders, setItemOrders] = useState<itemOrder[]>([]);
 
   const { data: orders, refetch: refetchOrders } =
-    api.order.getAllOrders.useQuery();
+    api.order.getAllOrders.useQuery({ date: currDate });
+
+  // const orders = utils.order.getAllOrders.getData();
 
   const { data: users, refetch: refetchUsers } =
     api.user.getAllUsers.useQuery();
@@ -70,7 +77,7 @@ const Order = () => {
       const previousOrders = utils.order.getAllOrders.getData();
 
       utils.order.getAllOrders.setData(
-        undefined,
+        { date: dayjs(currDate).toDate() },
         (old) =>
           old?.map((order) =>
             order.order_uid === updatedOrder.order_uid
@@ -83,7 +90,10 @@ const Order = () => {
     },
 
     onError: (err, updatedOrder, context) => {
-      utils.order.getAllOrders.setData(undefined, context?.previousOrders);
+      utils.order.getAllOrders.setData(
+        { date: dayjs(currDate).toDate() },
+        context?.previousOrders,
+      );
     },
 
     onSettled: async () => {
@@ -166,18 +176,15 @@ const Order = () => {
     ]);
   };
 
-  function isPaymentMode(mode: string): mode is "Gcash" | "Cash" | "BPI" {
-    return ["Gcash", "Cash", "BPI"].includes(mode);
-  }
+  const modalBehaviour = () => {
+    const modalElement = document.getElementById(
+      "add_order_modal",
+    ) as HTMLDialogElement;
 
-  function isDeliveryMode(mode: string): mode is "Pickup" | "Deliver" {
-    return ["Pickup", "Deliver"].includes(mode);
-  }
+    modalElement.close();
+  };
 
   const addOrder = () => {
-    console.log(isPaymentMode(paymentMode));
-    console.log(isDeliveryMode(deliveryMode));
-
     addOrderEndpoint.mutate({
       date: addDate ? addDate : "",
       amount_due: itemOrders.reduce(
@@ -193,6 +200,7 @@ const Order = () => {
         return { item_uid: itemOrder.itemUid, quantity: itemOrder.quantity };
       }),
     });
+    modalBehaviour();
   };
 
   const handleCheckboxClick = (orderId: string, paid: boolean) => {
@@ -205,121 +213,134 @@ const Order = () => {
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
-        <MobileDatePicker
-          className="self-center"
-          closeOnSelect={true}
-          sx={{
-            width: "100%",
-            ".MuiInputBase-input": {
-              letterSpacing: 0.5,
-              textAlign: "center",
-              // fontFamily: "Segoe ui",
-            },
-            ".MuiInputBase-root": {
-              borderRadius: 2,
-              height: 48,
-              background: "white",
-            },
-          }}
-          value={dayjs(currDate)}
-          onChange={(value: Dayjs | null) => {
-            console.log(value?.toDate());
-          }}
-        />
-
-        <div className="mt-3 flex flex-col gap-3 pb-28">
-          {orders?.map((order) => (
-            <div
-              key={order.order_uid}
-              className="collapse z-0 bg-white shadow-md"
-            >
-              <input type="checkbox" />
-              <div className="collapse-title p-4">
-                <div className="flex justify-between">
-                  <div>
-                    <h1 className="text-lg font-medium">
-                      {
-                        users?.find((user) => {
-                          return order.user_uid === user.user_uid;
-                        })?.first_name
-                      }{" "}
-                      {
-                        users?.find((user) => {
-                          return order.user_uid === user.user_uid;
-                        })?.last_name
-                      }
-                    </h1>
-                    <p className="text-sm text-[#707070]">
-                      {
+        {orders ? (
+          <>
+            <MobileDatePicker
+              className="self-center"
+              closeOnSelect={true}
+              sx={{
+                width: "100%",
+                ".MuiInputBase-input": {
+                  letterSpacing: 0.5,
+                  textAlign: "center",
+                  // fontFamily: "Segoe ui",
+                },
+                ".MuiInputBase-root": {
+                  borderRadius: 2,
+                  height: 48,
+                  background: "white",
+                },
+              }}
+              value={dayjs(currDate)}
+              onChange={(value: Dayjs | null) => {
+                setCurrDate(value!.toDate());
+              }}
+            />
+            <div className="mt-3 flex flex-col gap-3 pb-28">
+              {orders?.map((order) => (
+                <div
+                  key={order.order_uid}
+                  className="collapse z-0 bg-white shadow-md"
+                >
+                  <input type="checkbox" />
+                  <div className="collapse-title p-4">
+                    <div className="flex justify-between">
+                      <div>
+                        <h1 className="text-lg font-medium">
+                          {
+                            users?.find((user) => {
+                              return order.user_uid === user.user_uid;
+                            })?.first_name
+                          }{" "}
+                          {
+                            users?.find((user) => {
+                              return order.user_uid === user.user_uid;
+                            })?.last_name
+                          }
+                        </h1>
+                        <p className="text-sm text-[#707070]">
+                          {/* {
                         users?.find((user) => {
                           return order.user_uid === user.user_uid;
                         })?.contact_num
                       }{" "}
-                      • {order.delivery_mode}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-medium">
-                      {`₱${order.amount_due.toString()}`}
-                    </p>
-                    <p className="text-sm text-[#707070]">
-                      {order.payment_mode} • {order.paid ? "Paid" : "Unpaid"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="collapse-content bg-white">
-                <div className="divider my-[-0.5rem]"></div>
-                <div className="mt-4 flex flex-col gap-1">
-                  {order.item_order.map((itemOrder) => (
-                    <div
-                      key={itemOrder.item_uid}
-                      className="flex justify-between"
-                    >
-                      <p className="text-sm">
-                        {
-                          items?.find((item) => {
-                            return itemOrder.item_uid === item.item_uid;
-                          })?.name
-                        }
-                      </p>
-                      <p className="text-sm text-[#707070]">
-                        {`${itemOrder.quantity}`}{" "}
-                        {itemOrder.quantity > 1 ? "pcs." : "pc."}
-                      </p>
+                      •  */}
+                          {order.delivery_mode} at{" "}
+                          {dayjs
+                            .utc(order.date)
+                            .tz("Asia/Manila")
+                            .format("h:mm A")}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-medium">
+                          {`₱${order.amount_due.toString()}`}
+                        </p>
+                        <p className="text-sm text-[#707070]">
+                          {order.payment_mode} •{" "}
+                          {order.paid ? "Paid" : "Unpaid"}
+                        </p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-                {order.note && (
-                  <>
-                    <div className="divider my-2"></div>
-                    <p className="text-sm text-[#707070]">{order.note}</p>
-                  </>
-                )}
-                <div className="mt-6 flex justify-between">
-                  <div className="flex gap-2">
-                    <p className="self-center text-xs italic">
-                      Mark as {order.paid ? "unpaid" : "paid"}
-                    </p>
-                    <input
-                      type="checkbox"
-                      className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
-                      onClick={() =>
-                        handleCheckboxClick(order.order_uid, order.paid)
-                      }
-                      defaultChecked={order.paid}
-                      // checked={order.paid}
-                    />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MdEdit color={"#6f7687"} size={"1.1rem"} />
-                    <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                  <div className="collapse-content bg-white">
+                    <div className="divider my-[-0.5rem]"></div>
+                    <div className="mt-4 flex flex-col gap-1">
+                      {order.item_order.map((itemOrder) => (
+                        <div
+                          key={itemOrder.item_uid}
+                          className="flex justify-between"
+                        >
+                          <p className="text-sm">
+                            {
+                              items?.find((item) => {
+                                return itemOrder.item_uid === item.item_uid;
+                              })?.name
+                            }
+                          </p>
+                          <p className="text-sm text-[#707070]">
+                            {`${itemOrder.quantity}`}{" "}
+                            {itemOrder.quantity > 1 ? "pcs." : "pc."}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    {order.note && (
+                      <>
+                        <div className="divider my-2"></div>
+                        <p className="text-sm text-[#707070]">{order.note}</p>
+                      </>
+                    )}
+                    <div className="mt-6 flex justify-between">
+                      <div className="flex gap-2">
+                        <p className="self-center text-xs italic">
+                          Mark as {order.paid ? "unpaid" : "paid"}
+                        </p>
+                        <input
+                          type="checkbox"
+                          className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
+                          onClick={() =>
+                            handleCheckboxClick(order.order_uid, order.paid)
+                          }
+                          defaultChecked={order.paid}
+                          // checked={order.paid}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                        <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <div className="mt-6 text-center">
+            <span className="loading loading-ring loading-lg"></span>
+          </div>
+        )}
 
         <dialog
           id="add_order_modal"

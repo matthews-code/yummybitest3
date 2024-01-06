@@ -57,14 +57,32 @@ export const orderRouter = createTRPCRouter({
       });
     }),
 
-  getAllOrders: userRoleProcedure.query(({ ctx }) => {
-    return ctx.db.orders.findMany({
-      include: { item_order: true },
-      orderBy: [
-        {
-          date: "asc",
+  getAllOrders: userRoleProcedure
+    .input(z.object({ date: z.date() }))
+    .query(({ ctx, input }) => {
+      // console.log(dayjs(input.date).toDate());
+      // console.log(input.date);
+
+      // console.log(dayjs(input.date).startOf("d").toDate());
+      // console.log(dayjs(input.date).add(1, "day").startOf("d").toDate());
+
+      return ctx.db.orders.findMany({
+        where: {
+          AND: [
+            {
+              date: {
+                lte: dayjs(input.date).add(1, "day").startOf("d").toDate(),
+              },
+            },
+            { date: { gte: dayjs(input.date).startOf("d").toDate() } },
+          ],
         },
-      ],
-    });
-  }),
+        include: { item_order: true },
+        orderBy: [
+          {
+            date: "asc",
+          },
+        ],
+      });
+    }),
 });
