@@ -10,14 +10,6 @@ import {
 } from "~/server/api/trpc";
 
 export const itemRouter = createTRPCRouter({
-  // sample: adminRoleProcedure
-  //   .input(z.object({ text: z.string() }))
-  //   .query(({ input }) => {
-  //     return {
-  //       greeting: `Hello ${input.text}`,
-  //     };
-  //   }),
-
   createItem: adminRoleProcedure
     .input(
       z.object({
@@ -62,15 +54,21 @@ export const itemRouter = createTRPCRouter({
   deleteItem: adminRoleProcedure
     .input(z.object({ uid: z.string() }))
     .mutation(({ ctx, input }) => {
-      return ctx.db.items.delete({
+      return ctx.db.items.update({
         where: {
           item_uid: input.uid,
+        },
+        data: {
+          deleted: true,
         },
       });
     }),
 
   getAllItems: userRoleProcedure.query(({ ctx }) => {
     return ctx.db.items.findMany({
+      where: {
+        deleted: false,
+      },
       orderBy: [
         {
           created_at: "asc",

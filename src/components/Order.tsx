@@ -9,6 +9,7 @@ import { Delivery_mode, Payment_mode, Role } from "@prisma/client";
 import { FaPlus } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { MdDelete, MdEdit } from "react-icons/md";
+import { GiCardboardBox } from "react-icons/gi";
 
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -217,7 +218,7 @@ const Order = () => {
           <>
             <MobileDatePicker
               className="self-center"
-              closeOnSelect={true}
+              // closeOnSelect={true}
               sx={{
                 width: "100%",
                 ".MuiInputBase-input": {
@@ -231,11 +232,22 @@ const Order = () => {
                   background: "white",
                 },
               }}
+              // disableOpenPicker={true}
               value={dayjs(currDate)}
-              onChange={(value: Dayjs | null) => {
+              onAccept={(value: Dayjs | null) => {
                 setCurrDate(value!.toDate());
               }}
             />
+            {orders.length < 1 && (
+              <div className="mt-28">
+                <div className="mx-auto my-4 w-fit rounded-full bg-[#fcf6b1] p-6">
+                  <GiCardboardBox color={"#f4e976"} size={"8rem"} />
+                </div>
+                <p className="text-center text-base font-light text-[#a3a3a3]">
+                  No orders found
+                </p>
+              </div>
+            )}
             <div className="mt-3 flex flex-col gap-3 pb-28">
               {orders?.map((order) => (
                 <div

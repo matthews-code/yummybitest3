@@ -68,6 +68,7 @@ export const orderRouter = createTRPCRouter({
 
       return ctx.db.orders.findMany({
         where: {
+          deleted: false,
           AND: [
             {
               date: {
@@ -81,6 +82,9 @@ export const orderRouter = createTRPCRouter({
         orderBy: [
           {
             date: "asc",
+          },
+          {
+            user_uid: "asc",
           },
         ],
       });

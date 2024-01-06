@@ -79,6 +79,7 @@ model items {
   name       String       @unique
   price      Decimal      @db.Decimal(15, 3)
   inventory  Decimal?     @db.Decimal(15, 0)
+  deleted     Boolean @default(false)
   item_order item_order[]
   created_at DateTime     @db.Timestamptz()
 }
@@ -91,6 +92,7 @@ model orders {
   payment_mode      Payment_mode?
   delivery_mode     Delivery_mode
   note              String?
+  deleted     Boolean @default(false)
   user_uid          String?      @db.Uuid
   item_order        item_order[]
   users             users?       @relation(fields: [user_uid], references: [user_uid], onDelete: NoAction, onUpdate: NoAction)
@@ -102,6 +104,7 @@ model users {
   last_name   String?
   contact_num String   @unique @db.Char(11)
   address     String?
+  deleted     Boolean @default(false)
   orders      orders[]
 }
 

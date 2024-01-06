@@ -57,15 +57,21 @@ export const userRouter = createTRPCRouter({
   deleteUser: adminRoleProcedure
     .input(z.object({ uid: z.string() }))
     .mutation(({ ctx, input }) => {
-      return ctx.db.users.delete({
+      return ctx.db.users.update({
         where: {
           user_uid: input.uid,
+        },
+        data: {
+          deleted: true,
         },
       });
     }),
 
   getAllUsers: userRoleProcedure.query(({ ctx }) => {
     return ctx.db.users.findMany({
+      where: {
+        deleted: false,
+      },
       orderBy: [
         {
           // last_name: "asc",
