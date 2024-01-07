@@ -164,102 +164,108 @@ const Users = () => {
           onChange={(e) => setSearchInput(e.currentTarget.value)}
         />
 
-        <div className="mt-4 grid gap-3 pb-28 md:grid-cols-2 xl:grid-cols-3">
-          {users
-            ?.filter((user) => {
-              if (
-                user.first_name
-                  .toLowerCase()
-                  .startsWith(searchInput.toLowerCase())
-              ) {
-                return true;
-              }
-              if (
-                user.last_name
-                  ?.toLowerCase()
-                  .startsWith(searchInput.toLowerCase())
-              ) {
-                return true;
-              }
-              if (
-                `${user.first_name.toLowerCase()} ${user.last_name?.toLowerCase()}`.startsWith(
-                  searchInput.toLowerCase(),
-                )
-              ) {
-                return true;
-              }
-              if (user.contact_num.startsWith(searchInput)) {
-                return true;
-              }
+        {users ? (
+          <div className="mt-4 grid gap-3 pb-28 md:grid-cols-2 xl:grid-cols-3">
+            {users
+              ?.filter((user) => {
+                if (
+                  user.first_name
+                    .toLowerCase()
+                    .startsWith(searchInput.toLowerCase())
+                ) {
+                  return true;
+                }
+                if (
+                  user.last_name
+                    ?.toLowerCase()
+                    .startsWith(searchInput.toLowerCase())
+                ) {
+                  return true;
+                }
+                if (
+                  `${user.first_name.toLowerCase()} ${user.last_name?.toLowerCase()}`.startsWith(
+                    searchInput.toLowerCase(),
+                  )
+                ) {
+                  return true;
+                }
+                if (user.contact_num.startsWith(searchInput)) {
+                  return true;
+                }
 
-              return false;
-            })
-            .map((user) => (
-              <div key={user.user_uid} className="card bg-base-100 shadow-md">
-                <div className="card-body p-4 text-sm">
-                  <h1 className="card-title m-0 p-0 text-lg">
-                    {user.first_name} {user.last_name}
-                  </h1>
-                  <p className="mt-[-0.5rem] text-[#4c4c4c]">
-                    {user.contact_num}
-                  </p>
-                  <p>{user.address}</p>
-                  <div className="card-actions mt-1 flex w-full justify-between">
-                    <button className="btn btn-primary btn-sm">
-                      Order History
-                    </button>
-                    <div className="flex gap-2 self-center">
-                      <button
-                        onClick={() => {
-                          const modalElement = (document.getElementById(
-                            "edit_user_modal",
-                          ) as HTMLDialogElement)!;
-                          modalElement.showModal();
+                return false;
+              })
+              .map((user) => (
+                <div key={user.user_uid} className="card bg-base-100 shadow-md">
+                  <div className="card-body p-4 text-sm">
+                    <h1 className="card-title m-0 p-0 text-lg">
+                      {user.first_name} {user.last_name}
+                    </h1>
+                    <p className="mt-[-0.5rem] text-[#4c4c4c]">
+                      {user.contact_num}
+                    </p>
+                    <p>{user.address}</p>
+                    <div className="card-actions mt-1 flex w-full justify-between">
+                      <button className="btn btn-primary btn-sm">
+                        Order History
+                      </button>
+                      <div className="flex gap-2 self-center">
+                        <button
+                          onClick={() => {
+                            const modalElement = (document.getElementById(
+                              "edit_user_modal",
+                            ) as HTMLDialogElement)!;
+                            modalElement.showModal();
 
-                          if (
-                            editUserFirstNameInput.current !== null &&
-                            editUserLastNameInput.current !== null &&
-                            editUserContactNumInput.current !== null &&
-                            editUserAddressInput.current !== null
-                          ) {
-                            setUserUid(user.user_uid);
+                            if (
+                              editUserFirstNameInput.current !== null &&
+                              editUserLastNameInput.current !== null &&
+                              editUserContactNumInput.current !== null &&
+                              editUserAddressInput.current !== null
+                            ) {
+                              setUserUid(user.user_uid);
 
+                              setUserFirstName(user.first_name);
+                              setUserLastName(user.last_name ?? "");
+                              setUserContactNum(user.contact_num);
+                              setUserAddress(user.address ?? "");
+
+                              editUserFirstNameInput.current.value =
+                                user.first_name;
+                              editUserLastNameInput.current.value =
+                                user.last_name ?? "";
+                              editUserContactNumInput.current.value =
+                                user.contact_num;
+                              editUserAddressInput.current.value =
+                                user.address ?? "";
+                            }
+                          }}
+                        >
+                          <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                        </button>
+                        <button
+                          onClick={() => {
                             setUserFirstName(user.first_name);
-                            setUserLastName(user.last_name ?? "");
-                            setUserContactNum(user.contact_num);
-                            setUserAddress(user.address ?? "");
-
-                            editUserFirstNameInput.current.value =
-                              user.first_name;
-                            editUserLastNameInput.current.value =
-                              user.last_name ?? "";
-                            editUserContactNumInput.current.value =
-                              user.contact_num;
-                            editUserAddressInput.current.value =
-                              user.address ?? "";
-                          }
-                        }}
-                      >
-                        <MdEdit color={"#6f7687"} size={"1.1rem"} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setUserFirstName(user.first_name);
-                          setUserUid(user.user_uid);
-                          const modalElement = (document.getElementById(
-                            "delete_user_modal",
-                          ) as HTMLDialogElement)!;
-                          modalElement.showModal();
-                        }}
-                      >
-                        <MdDelete color={"#6f7687"} size={"1.1rem"} />
-                      </button>
+                            setUserUid(user.user_uid);
+                            const modalElement = (document.getElementById(
+                              "delete_user_modal",
+                            ) as HTMLDialogElement)!;
+                            modalElement.showModal();
+                          }}
+                        >
+                          <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-        </div>
+              ))}
+          </div>
+        ) : (
+          <div className="mt-8 text-center">
+            <span className="loading loading-ring loading-lg"></span>
+          </div>
+        )}
 
         {/* ADD USER MODAL */}
 

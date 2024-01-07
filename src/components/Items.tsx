@@ -5,6 +5,7 @@ import { Role } from "@prisma/client";
 import { FaPlus } from "react-icons/fa6";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
+import { GiCardboardBox } from "react-icons/gi";
 
 const Items = () => {
   const role = useSession().data?.user.role;
@@ -145,70 +146,91 @@ const Items = () => {
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
-        <div className="overflow-x-auto">
-          <table className="table sm:table-lg">
-            <thead>
-              <tr className="text-sm">
-                <th>Name</th>
-                <th>Price</th>
-                <th>Inventory</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {items?.map((item) => (
-                <tr key={item.item_uid}>
-                  <td>{item.name}</td>
-                  <td>{item.price.toString()}</td>
-                  <td>{item.inventory?.toString()}</td>
-                  <td className="">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          const modalElement = (document.getElementById(
-                            "edit_item_modal",
-                          ) as HTMLDialogElement)!;
-                          modalElement.showModal();
-                          if (
-                            editItemNameInput.current !== null &&
-                            editItemPriceInput.current !== null &&
-                            editItemInventoryInput.current !== null
-                          ) {
-                            setItemUid(item.item_uid);
+        {items ? (
+          <>
+            {items.length < 1 ? (
+              <div className="mt-28">
+                <div className="mx-auto my-4 w-fit rounded-full bg-[#fcf6b1] p-6">
+                  <GiCardboardBox color={"#f4e976"} size={"8rem"} />
+                </div>
+                <p className="text-center text-base font-light text-[#a3a3a3]">
+                  No items found
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="table sm:table-lg">
+                  <thead>
+                    <tr className="text-sm">
+                      <th>Name</th>
+                      <th>Price</th>
+                      <th>Inventory</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items?.map((item) => (
+                      <tr key={item.item_uid}>
+                        <td>{item.name}</td>
+                        <td>{item.price.toString()}</td>
+                        <td>{item.inventory?.toString()}</td>
+                        <td className="">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                const modalElement = (document.getElementById(
+                                  "edit_item_modal",
+                                ) as HTMLDialogElement)!;
+                                modalElement.showModal();
+                                if (
+                                  editItemNameInput.current !== null &&
+                                  editItemPriceInput.current !== null &&
+                                  editItemInventoryInput.current !== null
+                                ) {
+                                  setItemUid(item.item_uid);
 
-                            setItemName(item.name);
-                            setItemPrice(item.price.toString());
-                            setItemInventory(item.inventory?.toString() ?? "");
+                                  setItemName(item.name);
+                                  setItemPrice(item.price.toString());
+                                  setItemInventory(
+                                    item.inventory?.toString() ?? "",
+                                  );
 
-                            editItemNameInput.current.value = item.name;
-                            editItemPriceInput.current.value =
-                              item.price.toString();
-                            editItemInventoryInput.current.value =
-                              item.inventory?.toString() ?? "";
-                          }
-                        }}
-                      >
-                        <MdEdit color={"#6f7687"} size={"1.1rem"} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setItemName(item.name);
-                          setItemUid(item.item_uid);
-                          const modalElement = (document.getElementById(
-                            "delete_item_modal",
-                          ) as HTMLDialogElement)!;
-                          modalElement.showModal();
-                        }}
-                      >
-                        <MdDelete color={"#6f7687"} size={"1.1rem"} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                                  editItemNameInput.current.value = item.name;
+                                  editItemPriceInput.current.value =
+                                    item.price.toString();
+                                  editItemInventoryInput.current.value =
+                                    item.inventory?.toString() ?? "";
+                                }
+                              }}
+                            >
+                              <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setItemName(item.name);
+                                setItemUid(item.item_uid);
+                                const modalElement = (document.getElementById(
+                                  "delete_item_modal",
+                                ) as HTMLDialogElement)!;
+                                modalElement.showModal();
+                              }}
+                            >
+                              <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="mt-8 text-center">
+            <span className="loading loading-ring loading-lg"></span>
+          </div>
+        )}
 
         {/* ADD ITEM MODAL */}
 

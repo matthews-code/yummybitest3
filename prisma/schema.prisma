@@ -79,23 +79,23 @@ model items {
   name       String       @unique
   price      Decimal      @db.Decimal(15, 3)
   inventory  Decimal?     @db.Decimal(15, 0)
-  deleted     Boolean @default(false)
+  created_at DateTime     @db.Timestamptz(6)
+  deleted    Boolean      @default(false)
   item_order item_order[]
-  created_at DateTime     @db.Timestamptz()
 }
 
 model orders {
-  order_uid         String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  date              DateTime     @db.Timestamptz()
-  amount_due        Decimal      @db.Decimal(15, 3)
-  paid    Boolean @default(false)
-  payment_mode      Payment_mode?
-  delivery_mode     Delivery_mode
-  note              String?
-  deleted     Boolean @default(false)
-  user_uid          String?      @db.Uuid
-  item_order        item_order[]
-  users             users?       @relation(fields: [user_uid], references: [user_uid], onDelete: NoAction, onUpdate: NoAction)
+  order_uid     String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  date          DateTime      @db.Timestamptz(6)
+  amount_due    Decimal       @db.Decimal(15, 3)
+  note          String?
+  user_uid      String?       @db.Uuid
+  payment_mode  Payment_mode?
+  delivery_mode Delivery_mode
+  paid          Boolean       @default(false)
+  deleted       Boolean       @default(false)
+  item_order    item_order[]
+  users         users?        @relation(fields: [user_uid], references: [user_uid], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model users {
@@ -104,7 +104,7 @@ model users {
   last_name   String?
   contact_num String   @unique @db.Char(11)
   address     String?
-  deleted     Boolean @default(false)
+  deleted     Boolean  @default(false)
   orders      orders[]
 }
 

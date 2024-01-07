@@ -214,30 +214,30 @@ const Order = () => {
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
+        <MobileDatePicker
+          className="self-center"
+          // closeOnSelect={true}
+          sx={{
+            width: "100%",
+            ".MuiInputBase-input": {
+              letterSpacing: 0.5,
+              textAlign: "center",
+              // fontFamily: "Segoe ui",
+            },
+            ".MuiInputBase-root": {
+              borderRadius: 2,
+              height: 48,
+              background: "white",
+            },
+          }}
+          // disableOpenPicker={true}
+          value={dayjs(currDate)}
+          onAccept={(value: Dayjs | null) => {
+            setCurrDate(value!.toDate());
+          }}
+        />
         {orders ? (
           <>
-            <MobileDatePicker
-              className="self-center"
-              // closeOnSelect={true}
-              sx={{
-                width: "100%",
-                ".MuiInputBase-input": {
-                  letterSpacing: 0.5,
-                  textAlign: "center",
-                  // fontFamily: "Segoe ui",
-                },
-                ".MuiInputBase-root": {
-                  borderRadius: 2,
-                  height: 48,
-                  background: "white",
-                },
-              }}
-              // disableOpenPicker={true}
-              value={dayjs(currDate)}
-              onAccept={(value: Dayjs | null) => {
-                setCurrDate(value!.toDate());
-              }}
-            />
             {orders.length < 1 && (
               <div className="mt-28">
                 <div className="mx-auto my-4 w-fit rounded-full bg-[#fcf6b1] p-6">
@@ -349,7 +349,7 @@ const Order = () => {
             </div>
           </>
         ) : (
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <span className="loading loading-ring loading-lg"></span>
           </div>
         )}
