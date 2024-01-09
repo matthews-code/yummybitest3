@@ -59,7 +59,7 @@ const Users = () => {
   };
 
   const formatContact = (number: string) => {
-    let newNumber = number
+    const newNumber = number
       .replace(" ", "")
       .replace("+", "")
       .replace("(", "")
@@ -208,7 +208,12 @@ const Users = () => {
                       {user.first_name} {user.last_name}
                     </h1>
                     <p className="mt-[-0.5rem] text-[#4c4c4c]">
-                      {user.contact_num}
+                      <a
+                        href={`tel:${user.contact_num}`}
+                        className="text-xs italic text-blue-600 underline"
+                      >
+                        {user.contact_num}
+                      </a>
                     </p>
                     <p>{user.address}</p>
                     <div className="card-actions mt-1 flex w-full justify-between">
@@ -372,7 +377,7 @@ const Users = () => {
                     let formattedContact = "";
                     if (
                       userContactNum.length === 11 &&
-                      userContactNum.charAt(0) === "0"
+                      userContactNum.startsWith("0")
                     ) {
                       // console.log("63" + userContactNum.slice(1));
                       formattedContact = "63" + userContactNum.slice(1);
@@ -520,7 +525,7 @@ const Users = () => {
                     let formattedContact = "";
                     if (
                       userContactNum.length === 11 &&
-                      userContactNum.charAt(0) === "0"
+                      userContactNum.startsWith("0")
                     ) {
                       // console.log("63" + userContactNum.slice(1));
                       formattedContact = "63" + userContactNum.slice(1);
