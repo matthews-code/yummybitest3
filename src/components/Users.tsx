@@ -58,6 +58,16 @@ const Users = () => {
     setUserUid("");
   };
 
+  const formatContact = (number: string) => {
+    let newNumber = number
+      .replace(" ", "")
+      .replace("+", "")
+      .replace("(", "")
+      .replace(")", "");
+
+    return newNumber;
+  };
+
   const checkErrors = (
     firstName: string,
     lastName: string,
@@ -79,16 +89,12 @@ const Users = () => {
       return false;
     }
 
-    if (!/^\d{11}$/.test(contactNum)) {
-      addUser
-        ? userContactNumInput.current?.classList.add("input-error")
-        : editUserContactNumInput.current?.classList.add("input-error");
-      return false;
-    }
-
     if (
       users?.some(
-        (user) => user.contact_num === contactNum && user.user_uid !== userUid,
+        (user) =>
+          user.contact_num === contactNum &&
+          user.user_uid !== userUid &&
+          user.deleted === false,
       )
     ) {
       addUser
@@ -325,16 +331,15 @@ const Users = () => {
                 value={userContactNum}
                 className="input input-bordered input-md w-full"
                 onChange={(e) => {
-                  setUserContactNum(e.currentTarget.value);
-
-                  if (!/^\d{0,11}$/.test(e.currentTarget.value)) {
+                  if (!/^[+()0-9- ]*$/.test(e.currentTarget.value)) {
                     userContactNumInput.current?.classList.add("input-error");
-                  } else {
-                    userContactNumInput.current?.classList.remove(
-                      "input-error",
-                    );
+                    return;
                   }
 
+                  const formattedContact = formatContact(e.currentTarget.value);
+
+                  setUserContactNum(formattedContact);
+                  userContactNumInput.current?.classList.remove("input-error");
                   duplicateNumberText.current?.classList.add("hidden");
                 }}
               />
@@ -357,19 +362,32 @@ const Users = () => {
             </div>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
-                <button className="btn border-none">cancel</button>
+                <button className="btn border-none" onClick={clearStates}>
+                  cancel
+                </button>
                 <div
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={() =>
+                  onClick={() => {
+                    let formattedContact = "";
+                    if (
+                      userContactNum.length === 11 &&
+                      userContactNum.charAt(0) === "0"
+                    ) {
+                      // console.log("63" + userContactNum.slice(1));
+                      formattedContact = "63" + userContactNum.slice(1);
+                    } else {
+                      formattedContact = userContactNum;
+                    }
+
                     addUser(
                       userFirstName,
                       userLastName,
-                      userContactNum,
+                      formattedContact,
                       userAddress,
                       true,
-                    )
-                  }
+                    );
+                  }}
                 >
                   add
                 </div>
@@ -438,18 +456,21 @@ const Users = () => {
                 type="text"
                 className="input input-bordered input-md w-full"
                 onChange={(e) => {
-                  setUserContactNum(e.currentTarget.value);
-
-                  if (!/^\d{0,11}$/.test(e.currentTarget.value)) {
+                  if (!/^[+()0-9- ]*/.test(e.currentTarget.value)) {
                     editUserContactNumInput.current?.classList.add(
                       "input-error",
                     );
-                  } else {
-                    editUserContactNumInput.current?.classList.remove(
-                      "input-error",
-                    );
+                    return;
                   }
 
+                  const editFormattedContact = formatContact(
+                    e.currentTarget.value,
+                  );
+
+                  setUserContactNum(editFormattedContact);
+                  editUserContactNumInput.current?.classList.remove(
+                    "input-error",
+                  );
                   editDuplicateNumberText.current?.classList.add("hidden");
                 }}
               />
@@ -495,15 +516,26 @@ const Users = () => {
                 <div
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={() =>
+                  onClick={() => {
+                    let formattedContact = "";
+                    if (
+                      userContactNum.length === 11 &&
+                      userContactNum.charAt(0) === "0"
+                    ) {
+                      // console.log("63" + userContactNum.slice(1));
+                      formattedContact = "63" + userContactNum.slice(1);
+                    } else {
+                      formattedContact = userContactNum;
+                    }
+
                     editUser(
                       userFirstName,
                       userLastName,
-                      userContactNum,
+                      formattedContact,
                       userAddress,
                       false,
-                    )
-                  }
+                    );
+                  }}
                 >
                   save
                 </div>

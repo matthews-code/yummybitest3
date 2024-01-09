@@ -102,7 +102,7 @@ model users {
   user_uid    String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   first_name  String
   last_name   String?
-  contact_num String   @unique @db.Char(11)
+  contact_num String   @db.Char(12)
   address     String?
   deleted     Boolean  @default(false)
   orders      orders[]

@@ -31,6 +31,8 @@ const Order = () => {
   const costumerSearchDiv = useRef<HTMLDivElement>(null);
   const itemQuantityInput = useRef<HTMLInputElement>(null);
 
+  const [isAddingOrder, setIsAddingOrder] = useState(true);
+
   const [addOrderStep, setAddOrderStep] = useState(1);
 
   const [costumerUid, setCostumerUid] = useState<string>("");
@@ -339,7 +341,18 @@ const Order = () => {
                         />
                       </div>
                       <div className="flex items-center gap-2">
-                        <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                        <button
+                          onClick={() => {
+                            setIsAddingOrder(false);
+
+                            const modalElement = (document.getElementById(
+                              "add_order_modal",
+                            ) as HTMLDialogElement)!;
+                            modalElement.showModal();
+                          }}
+                        >
+                          <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                        </button>
                         <MdDelete color={"#6f7687"} size={"1.1rem"} />
                       </div>
                     </div>
@@ -359,7 +372,9 @@ const Order = () => {
           className="modal modal-top sm:modal-middle"
         >
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Add Order</h1>
+            <h1 className="text-lg font-bold">
+              {isAddingOrder ? "Add Order" : "Edit Order"}
+            </h1>
             <div className="divider m-0 p-0"></div>
             {addOrderStep === 1 && (
               <>
@@ -686,6 +701,7 @@ const Order = () => {
           <button
             className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
             onClick={() => {
+              setIsAddingOrder(true);
               const modalElement = (document.getElementById(
                 "add_order_modal",
               ) as HTMLDialogElement)!;
