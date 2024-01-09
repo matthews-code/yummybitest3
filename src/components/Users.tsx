@@ -210,7 +210,7 @@ const Users = () => {
                     <p className="mt-[-0.5rem] text-[#4c4c4c]">
                       <a
                         href={`tel:${user.contact_num}`}
-                        className="text-xs italic text-blue-600 underline"
+                        className="text-sm italic text-blue-600 underline"
                       >
                         {user.contact_num}
                       </a>
@@ -459,6 +459,7 @@ const Users = () => {
                 id="edit-user-contact-number-input"
                 ref={editUserContactNumInput}
                 type="text"
+                value={userContactNum}
                 className="input input-bordered input-md w-full"
                 onChange={(e) => {
                   if (!/^[+()0-9- ]*/.test(e.currentTarget.value)) {
