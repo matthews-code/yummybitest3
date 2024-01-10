@@ -89,6 +89,24 @@ export const orderRouter = createTRPCRouter({
       return await ctx.db.$transaction([deleteItemOrders, updateOrder]);
     }),
 
+  deleteOrder: adminRoleProcedure
+    .input(z.object({ uid: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const deleteItemOrders = ctx.db.item_order.deleteMany({
+        where: {
+          order_uid: input.uid,
+        },
+      });
+
+      const deleteOrder = ctx.db.orders.delete({
+        where: {
+          order_uid: input.uid,
+        },
+      });
+
+      return await ctx.db.$transaction([deleteItemOrders, deleteOrder]);
+    }),
+
   togglePaid: adminRoleProcedure
     .input(z.object({ order_uid: z.string(), paid: z.boolean() }))
     .mutation(({ ctx, input }) => {

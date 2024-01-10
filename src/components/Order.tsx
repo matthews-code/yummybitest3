@@ -98,6 +98,12 @@ const Order = () => {
     },
   });
 
+  const deleteOrderEndpoint = api.order.deleteOrder.useMutation({
+    onSuccess: () => {
+      void refetchOrders();
+    },
+  });
+
   const togglePaid = api.order.togglePaid.useMutation({
     async onMutate(updatedOrder) {
       await utils.order.getAllOrders.cancel();
@@ -140,6 +146,7 @@ const Order = () => {
     setCostumerUid("");
     setItemUid("");
     setSelectedItem("");
+    setOrderUid("");
   };
 
   const setStates = (order: order) => {
@@ -301,6 +308,11 @@ const Order = () => {
     setAddOrderStep(1);
     clearStates();
     modalBehaviour();
+  };
+
+  const deleteOrder = () => {
+    deleteOrderEndpoint.mutate({ uid: orderUid });
+    clearStates();
   };
 
   const handleCheckboxClick = (orderId: string, paid: boolean) => {
@@ -478,7 +490,17 @@ const Order = () => {
                         >
                           <MdEdit color={"#6f7687"} size={"1.2rem"} />
                         </button>
-                        <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                        <button
+                          onClick={() => {
+                            setOrderUid(order.order_uid);
+                            const modalElement = (document.getElementById(
+                              "delete_order_modal",
+                            ) as HTMLDialogElement)!;
+                            modalElement.showModal();
+                          }}
+                        >
+                          <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -840,6 +862,30 @@ const Order = () => {
                       : "next"}
                   </div>
                 </div>
+              </form>
+            </div>
+          </div>
+        </dialog>
+
+        <dialog
+          id="delete_order_modal"
+          className="modal modal-top sm:modal-middle"
+        >
+          <div className="modal-box p-5">
+            <h1 className="text-lg font-bold">Delete Order</h1>
+            <div className="divider m-0 p-0"></div>
+            <p>Are you sure you want to delete this order?</p>
+            <div className="modal-action">
+              <form method="dialog" className="flex gap-2">
+                <button className="btn border-none" onClick={clearStates}>
+                  cancel
+                </button>
+                <button
+                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
+                  onClick={deleteOrder}
+                >
+                  delete
+                </button>
               </form>
             </div>
           </div>
