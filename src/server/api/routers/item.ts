@@ -16,6 +16,7 @@ export const itemRouter = createTRPCRouter({
         name: z.string(),
         price: z.number(),
         inventory: z.number().int().nullable(),
+        serving: z.number(),
       }),
     )
     .mutation(({ ctx, input }) => {
@@ -24,6 +25,7 @@ export const itemRouter = createTRPCRouter({
           name: input.name,
           price: input.price,
           inventory: input.inventory ?? null,
+          serving: input.serving,
           created_at: dayjs().toISOString(),
         },
       });
@@ -36,6 +38,7 @@ export const itemRouter = createTRPCRouter({
         name: z.string(),
         price: z.number(),
         inventory: z.number().int().nullable(),
+        serving: z.number(),
       }),
     )
     .mutation(({ ctx, input }) => {
@@ -47,6 +50,7 @@ export const itemRouter = createTRPCRouter({
           name: input.name,
           price: input.price,
           inventory: input.inventory ?? null,
+          serving: input.serving,
         },
       });
     }),

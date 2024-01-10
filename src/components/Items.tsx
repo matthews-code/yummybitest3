@@ -6,24 +6,34 @@ import { FaPlus } from "react-icons/fa6";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import { GiCardboardBox } from "react-icons/gi";
+import { Decimal } from "@prisma/client/runtime/library";
+
+interface item {
+  item_uid: string;
+  name: string;
+  price: Decimal;
+  serving: Decimal;
+  inventory: Decimal | null;
+  created_at: Date;
+  deleted: boolean;
+}
 
 const Items = () => {
   const role = useSession().data?.user.role;
 
   const itemNameInput = useRef<HTMLInputElement>(null);
   const itemPriceInput = useRef<HTMLInputElement>(null);
+  const itemServingInput = useRef<HTMLInputElement>(null);
   const itemInventoryInput = useRef<HTMLInputElement>(null);
 
   const duplicateNameText = useRef<HTMLParagraphElement>(null);
-  const editDuplicateNameText = useRef<HTMLParagraphElement>(null);
 
-  const editItemNameInput = useRef<HTMLInputElement>(null);
-  const editItemPriceInput = useRef<HTMLInputElement>(null);
-  const editItemInventoryInput = useRef<HTMLInputElement>(null);
+  const [isAddingItem, setIsAddingItem] = useState(true);
 
   const [itemUid, setItemUid] = useState<string>("");
   const [itemName, setItemName] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
+  const [itemServing, setItemServing] = useState<string>("");
   const [itemInventory, setItemInventory] = useState<string>("");
 
   const { data: items, refetch: refetchItems } =
@@ -51,90 +61,77 @@ const Items = () => {
     setItemName("");
     setItemPrice("");
     setItemInventory("");
+    setItemServing("");
     setItemUid("");
   };
 
-  const checkErrors = (
-    name: string,
-    price: string,
-    inventory: string,
-    addItem: boolean,
-  ) => {
-    if (name === "") {
-      addItem
-        ? itemNameInput.current?.classList.add("input-error")
-        : editItemNameInput.current?.classList.add("input-error");
+  const setStates = (item: item) => {
+    setItemUid(item.item_uid);
+
+    setItemName(item.name);
+    setItemPrice(item.price.toString());
+    setItemInventory(item.inventory?.toString() ?? "");
+    setItemServing(item.serving.toString());
+  };
+
+  const checkErrors = () => {
+    if (itemName === "") {
+      itemNameInput.current?.classList.add("input-error");
       return false;
     }
 
-    if (price === "") {
-      addItem
-        ? itemPriceInput.current?.classList.add("input-error")
-        : editItemPriceInput.current?.classList.add("input-error");
+    if (itemServing === "") {
+      itemServingInput.current?.classList.add("input-error");
+      return false;
+    }
+
+    if (itemPrice === "") {
+      itemPriceInput.current?.classList.add("input-error");
       return false;
     }
 
     if (
-      items?.some((item) => item.name === name && item.item_uid !== itemUid)
+      items?.some((item) => item.name === itemName && item.item_uid !== itemUid)
     ) {
-      addItem
-        ? duplicateNameText.current?.classList.remove("hidden")
-        : editDuplicateNameText.current?.classList.remove("hidden");
-      return false;
-    }
-
-    if (!/^\d*\.?\d*$/.test(price)) {
-      return false;
-    }
-
-    if (!/^\d*$/.test(inventory)) {
+      duplicateNameText.current?.classList.remove("hidden");
       return false;
     }
 
     return true;
   };
 
-  const modalBehaviour = (addItem: boolean) => {
-    const elementId = addItem ? "add_item_modal" : "edit_item_modal";
+  const modalBehaviour = () => {
     const modalElement = (document.getElementById(
-      elementId,
+      "add_item_modal",
     ) as HTMLDialogElement)!;
 
     modalElement.close();
   };
 
-  const addItem = (
-    name: string,
-    price: string,
-    inventory: string,
-    addItem: boolean,
-  ) => {
-    if (checkErrors(name, price, inventory, addItem)) {
+  const addItem = () => {
+    if (checkErrors()) {
       addItemEndpoint.mutate({
-        name: name,
-        price: Number(price),
-        inventory: inventory === "" ? null : Number(inventory),
+        name: itemName,
+        price: Number(itemPrice),
+        inventory: itemInventory === "" ? null : Number(itemInventory),
+        serving: Number(itemServing),
       });
       clearStates();
-      modalBehaviour(addItem);
+      modalBehaviour();
     }
   };
 
-  const editItem = (
-    name: string,
-    price: string,
-    inventory: string,
-    addItem: boolean,
-  ) => {
-    if (checkErrors(name, price, inventory, addItem)) {
+  const editItem = () => {
+    if (checkErrors()) {
       editItemEndpoint.mutate({
         uid: itemUid,
         name: itemName,
         price: Number(itemPrice),
         inventory: itemInventory === "" ? null : Number(itemInventory),
+        serving: Number(itemServing),
       });
       clearStates();
-      modalBehaviour(addItem);
+      modalBehaviour();
     }
   };
 
@@ -164,7 +161,7 @@ const Items = () => {
                     <tr className="text-sm">
                       <th>Name</th>
                       <th>Price</th>
-                      <th>Inventory</th>
+                      <th>Inv.</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -179,35 +176,23 @@ const Items = () => {
                       .map((item) => (
                         <tr key={item.item_uid}>
                           <td>{item.name}</td>
-                          <td>{item.price.toString()}</td>
+                          <td>
+                            {item.price.toString()} /{" "}
+                            {item.serving.toString() +
+                              (Number(item.serving) > 1 ? "pcs." : "pc.")}
+                          </td>
                           <td>{item.inventory?.toString()}</td>
                           <td className="">
                             <div className="flex gap-2">
                               <button
                                 onClick={() => {
+                                  setStates(item);
+                                  setIsAddingItem(false);
+
                                   const modalElement = (document.getElementById(
-                                    "edit_item_modal",
+                                    "add_item_modal",
                                   ) as HTMLDialogElement)!;
                                   modalElement.showModal();
-                                  if (
-                                    editItemNameInput.current !== null &&
-                                    editItemPriceInput.current !== null &&
-                                    editItemInventoryInput.current !== null
-                                  ) {
-                                    setItemUid(item.item_uid);
-
-                                    setItemName(item.name);
-                                    setItemPrice(item.price.toString());
-                                    setItemInventory(
-                                      item.inventory?.toString() ?? "",
-                                    );
-
-                                    editItemNameInput.current.value = item.name;
-                                    editItemPriceInput.current.value =
-                                      item.price.toString();
-                                    editItemInventoryInput.current.value =
-                                      item.inventory?.toString() ?? "";
-                                  }
                                 }}
                               >
                                 <MdEdit color={"#6f7687"} size={"1.2rem"} />
@@ -243,49 +228,32 @@ const Items = () => {
 
         <dialog id="add_item_modal" className="modal modal-top sm:modal-middle">
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Add Item</h1>
+            <h1 className="text-lg font-bold">
+              {isAddingItem ? "Add Item" : "Edit Item"}
+            </h1>
             <div className="divider m-0 p-0"></div>
-            <div className="label">
-              <span className="label-text">
-                Name{" "}
-                <i ref={duplicateNameText} className="hidden text-red-600">
-                  (name is already taken)
-                </i>
-              </span>
-            </div>
-            <input
-              id="item-name-input"
-              ref={itemNameInput}
-              type="text"
-              placeholder="Empanada"
-              value={itemName}
-              className="input input-bordered input-md w-full"
-              onChange={(e) => {
-                setItemName(e.currentTarget.value);
-                itemNameInput.current?.classList.remove("input-error");
-
-                duplicateNameText.current?.classList.add("hidden");
-              }}
-            />
-            <div className="mt-2 flex gap-4">
+            <div className="flex gap-4">
               <div className="w-full">
                 <div className="label">
-                  <span className="label-text">Price Per Piece</span>
+                  <span className="label-text">
+                    Name{" "}
+                    <i ref={duplicateNameText} className="hidden text-red-600">
+                      (already taken)
+                    </i>
+                  </span>
                 </div>
                 <input
-                  id="item-price-input"
-                  ref={itemPriceInput}
+                  id="item-name-input"
+                  ref={itemNameInput}
                   type="text"
-                  placeholder="50"
-                  value={itemPrice}
+                  placeholder="Empanada"
+                  value={itemName}
                   className="input input-bordered input-md w-full"
                   onChange={(e) => {
-                    setItemPrice(e.currentTarget.value);
-                    if (!/^\d*\.?\d*$/.test(e.currentTarget.value)) {
-                      itemPriceInput.current?.classList.add("input-error");
-                    } else {
-                      itemPriceInput.current?.classList.remove("input-error");
-                    }
+                    setItemName(e.currentTarget.value);
+                    itemNameInput.current?.classList.remove("input-error");
+
+                    duplicateNameText.current?.classList.add("hidden");
                   }}
                 />
               </div>
@@ -299,14 +267,13 @@ const Items = () => {
                   id="item-inventory-input"
                   ref={itemInventoryInput}
                   type="text"
-                  placeholder="120"
                   value={itemInventory}
                   className="input input-bordered input-md w-full"
                   onChange={(e) => {
-                    setItemInventory(e.currentTarget.value);
                     if (!/^\d*$/.test(e.currentTarget.value)) {
                       itemInventoryInput.current?.classList.add("input-error");
                     } else {
+                      setItemInventory(e.currentTarget.value);
                       itemInventoryInput.current?.classList.remove(
                         "input-error",
                       );
@@ -315,97 +282,47 @@ const Items = () => {
                 />
               </div>
             </div>
-            <div className="modal-action">
-              <form method="dialog" className="flex gap-2">
-                <button className="btn border-none" onClick={clearStates}>
-                  cancel
-                </button>
-                <div
-                  tabIndex={0}
-                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={() =>
-                    addItem(itemName, itemPrice, itemInventory, true)
-                  }
-                >
-                  add
-                </div>
-              </form>
-            </div>
-          </div>
-        </dialog>
-
-        {/* EDIT ITEM MODAL */}
-
-        <dialog
-          id="edit_item_modal"
-          className="modal modal-top sm:modal-middle"
-        >
-          <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Edit Item</h1>
-            <div className="divider m-0 p-0"></div>
-            <div className="label">
-              <span className="label-text">
-                Name{" "}
-                <i ref={editDuplicateNameText} className="hidden text-red-600">
-                  (name is already taken)
-                </i>
-              </span>
-            </div>
-            <input
-              id="edit-name-input"
-              ref={editItemNameInput}
-              type="text"
-              className="input input-bordered input-md w-full"
-              onChange={(e) => {
-                setItemName(e.currentTarget.value);
-                editItemNameInput.current?.classList.remove("input-error");
-
-                editDuplicateNameText.current?.classList.add("hidden");
-              }}
-            />
             <div className="mt-2 flex gap-4">
               <div className="w-full">
                 <div className="label">
-                  <span className="label-text">Price Per Piece</span>
+                  <span className="label-text">
+                    Serving <span className="italic">(pcs.)</span>
+                  </span>
                 </div>
                 <input
-                  id="item-price-input"
-                  ref={editItemPriceInput}
+                  id="item-multiplier-input"
+                  ref={itemServingInput}
                   type="text"
+                  placeholder="12"
+                  value={itemServing}
                   className="input input-bordered input-md w-full"
                   onChange={(e) => {
-                    setItemPrice(e.currentTarget.value);
-                    if (!/^\d*\.?\d*$/.test(e.currentTarget.value)) {
-                      editItemPriceInput.current?.classList.add("input-error");
+                    if (!/^\d*$/.test(e.currentTarget.value)) {
+                      itemServingInput.current?.classList.add("input-error");
                     } else {
-                      editItemPriceInput.current?.classList.remove(
-                        "input-error",
-                      );
+                      setItemServing(e.currentTarget.value);
+                      itemServingInput.current?.classList.remove("input-error");
                     }
                   }}
                 />
               </div>
               <div className="w-full">
                 <div className="label">
-                  <span className="label-text">
-                    Inventory - <i className="text-sm">Optional</i>
-                  </span>
+                  <span className="label-text">Price Per Serving</span>
                 </div>
                 <input
-                  id="item-inventory-input"
-                  ref={editItemInventoryInput}
+                  id="item-price-input"
+                  ref={itemPriceInput}
                   type="text"
+                  placeholder="400"
+                  value={itemPrice}
                   className="input input-bordered input-md w-full"
                   onChange={(e) => {
-                    setItemInventory(e.currentTarget.value);
-                    if (!/^\d*$/.test(e.currentTarget.value)) {
-                      editItemInventoryInput.current?.classList.add(
-                        "input-error",
-                      );
+                    if (!/^\d*\.?\d*$/.test(e.currentTarget.value)) {
+                      itemPriceInput.current?.classList.add("input-error");
                     } else {
-                      editItemInventoryInput.current?.classList.remove(
-                        "input-error",
-                      );
+                      setItemPrice(e.currentTarget.value);
+                      itemPriceInput.current?.classList.remove("input-error");
                     }
                   }}
                 />
@@ -416,14 +333,10 @@ const Items = () => {
                 <button
                   className="btn border-none"
                   onClick={() => {
-                    editItemNameInput.current?.classList.remove("input-error");
-                    editItemPriceInput.current?.classList.remove("input-error");
-                    editItemInventoryInput.current?.classList.remove(
-                      "input-error",
-                    );
-
-                    editDuplicateNameText.current?.classList.add("hidden");
-
+                    itemNameInput.current?.classList.remove("input-error");
+                    itemInventoryInput.current?.classList.remove("input-error");
+                    itemPriceInput.current?.classList.remove("input-error");
+                    itemServingInput.current?.classList.remove("input-error");
                     clearStates();
                   }}
                 >
@@ -432,11 +345,11 @@ const Items = () => {
                 <div
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={() =>
-                    editItem(itemName, itemPrice, itemInventory, false)
-                  }
+                  onClick={() => {
+                    isAddingItem ? addItem() : editItem();
+                  }}
                 >
-                  save
+                  {isAddingItem ? "add" : "save"}
                 </div>
               </form>
             </div>
@@ -475,6 +388,7 @@ const Items = () => {
           <button
             className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
             onClick={() => {
+              setIsAddingItem(true);
               const modalElement = (document.getElementById(
                 "add_item_modal",
               ) as HTMLDialogElement)!;
