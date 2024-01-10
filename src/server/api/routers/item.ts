@@ -66,9 +66,6 @@ export const itemRouter = createTRPCRouter({
 
   getAllItems: userRoleProcedure.query(({ ctx }) => {
     return ctx.db.items.findMany({
-      where: {
-        deleted: false,
-      },
       orderBy: [
         {
           created_at: "asc",

@@ -56,6 +56,8 @@ const Users = () => {
     setUserContactNum("");
     setUserAddress("");
     setUserUid("");
+    duplicateNumberText.current?.classList.add("hidden");
+    editDuplicateNumberText.current?.classList.add("hidden");
   };
 
   const formatContact = (number: string) => {
@@ -201,6 +203,12 @@ const Users = () => {
 
                 return false;
               })
+              .filter((user) => {
+                if (!user.deleted) {
+                  return true;
+                }
+                return false;
+              })
               .map((user) => (
                 <div key={user.user_uid} className="card bg-base-100 shadow-md">
                   <div className="card-body p-4 text-sm">
@@ -252,7 +260,7 @@ const Users = () => {
                             }
                           }}
                         >
-                          <MdEdit color={"#6f7687"} size={"1.1rem"} />
+                          <MdEdit color={"#6f7687"} size={"1.2rem"} />
                         </button>
                         <button
                           onClick={() => {
@@ -264,7 +272,7 @@ const Users = () => {
                             modalElement.showModal();
                           }}
                         >
-                          <MdDelete color={"#6f7687"} size={"1.1rem"} />
+                          <MdDelete color={"#6f7687"} size={"1.2rem"} />
                         </button>
                       </div>
                     </div>

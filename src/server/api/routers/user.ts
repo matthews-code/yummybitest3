@@ -69,13 +69,13 @@ export const userRouter = createTRPCRouter({
 
   getAllUsers: userRoleProcedure.query(({ ctx }) => {
     return ctx.db.users.findMany({
-      where: {
-        deleted: false,
-      },
       orderBy: [
         {
           // last_name: "asc",
           first_name: "asc",
+        },
+        {
+          user_uid: "asc",
         },
       ],
     });

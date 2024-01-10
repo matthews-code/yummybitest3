@@ -3,9 +3,10 @@ import { signIn, signOut, useSession } from "next-auth/react";
 
 interface HeaderProps {
   setPage: React.Dispatch<React.SetStateAction<string>>;
+  page: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ setPage }) => {
+const Header: React.FC<HeaderProps> = (props) => {
   const { data: sessionData } = useSession();
 
   const handleClick = () => {
@@ -15,17 +16,26 @@ const Header: React.FC<HeaderProps> = ({ setPage }) => {
     }
   };
 
-  // console.log(sessionData?.user);
+  const headerText = () => {
+    if (props.page === "orders") {
+      return "Orders";
+    }
+
+    if (props.page === "users") {
+      return "Customers";
+    }
+
+    if (props.page === "items") {
+      return "Items";
+    }
+  };
 
   return (
     <div className="navbar bg-primary text-primary-content">
       <div className="flex-1 pl-5 text-3xl font-bold">
         {sessionData ? (
-          <p
-            onClick={() => setPage("orders")}
-            className="cursor-pointer text-xl text-[#3d3d3d] sm:text-3xl"
-          >
-            Yummy Bites Dashboard
+          <p className="cursor-pointer text-xl text-[#3d3d3d] sm:text-3xl">
+            {headerText()} Dashboard
           </p>
         ) : (
           ""
@@ -51,13 +61,13 @@ const Header: React.FC<HeaderProps> = ({ setPage }) => {
               className="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow-md"
             >
               <li tabIndex={0}>
-                <p onClick={() => setPage("orders")}>Orders</p>
+                <p onClick={() => props.setPage("orders")}>Orders</p>
               </li>
               <li tabIndex={0}>
-                <p onClick={() => setPage("users")}>Customers</p>
+                <p onClick={() => props.setPage("users")}>Customers</p>
               </li>
               <li tabIndex={0}>
-                <p onClick={() => setPage("items")}>Items</p>
+                <p onClick={() => props.setPage("items")}>Items</p>
               </li>
               <li tabIndex={0}>
                 <p onClick={() => void signOut()}>Log Out</p>

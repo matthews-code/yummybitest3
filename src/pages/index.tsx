@@ -43,7 +43,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        {sessionData && <Header setPage={setPage}></Header>}
+        {sessionData && <Header setPage={setPage} page={page}></Header>}
         {sessionData && page === "orders" && <Order></Order>}
         {sessionData && page === "users" && <Users></Users>}
         {sessionData && page === "items" && <Items></Items>}

@@ -169,58 +169,65 @@ const Items = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {items?.map((item) => (
-                      <tr key={item.item_uid}>
-                        <td>{item.name}</td>
-                        <td>{item.price.toString()}</td>
-                        <td>{item.inventory?.toString()}</td>
-                        <td className="">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                const modalElement = (document.getElementById(
-                                  "edit_item_modal",
-                                ) as HTMLDialogElement)!;
-                                modalElement.showModal();
-                                if (
-                                  editItemNameInput.current !== null &&
-                                  editItemPriceInput.current !== null &&
-                                  editItemInventoryInput.current !== null
-                                ) {
-                                  setItemUid(item.item_uid);
+                    {items
+                      ?.filter((item) => {
+                        if (!item.deleted) {
+                          return true;
+                        }
+                        return false;
+                      })
+                      .map((item) => (
+                        <tr key={item.item_uid}>
+                          <td>{item.name}</td>
+                          <td>{item.price.toString()}</td>
+                          <td>{item.inventory?.toString()}</td>
+                          <td className="">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  const modalElement = (document.getElementById(
+                                    "edit_item_modal",
+                                  ) as HTMLDialogElement)!;
+                                  modalElement.showModal();
+                                  if (
+                                    editItemNameInput.current !== null &&
+                                    editItemPriceInput.current !== null &&
+                                    editItemInventoryInput.current !== null
+                                  ) {
+                                    setItemUid(item.item_uid);
 
+                                    setItemName(item.name);
+                                    setItemPrice(item.price.toString());
+                                    setItemInventory(
+                                      item.inventory?.toString() ?? "",
+                                    );
+
+                                    editItemNameInput.current.value = item.name;
+                                    editItemPriceInput.current.value =
+                                      item.price.toString();
+                                    editItemInventoryInput.current.value =
+                                      item.inventory?.toString() ?? "";
+                                  }
+                                }}
+                              >
+                                <MdEdit color={"#6f7687"} size={"1.2rem"} />
+                              </button>
+                              <button
+                                onClick={() => {
                                   setItemName(item.name);
-                                  setItemPrice(item.price.toString());
-                                  setItemInventory(
-                                    item.inventory?.toString() ?? "",
-                                  );
-
-                                  editItemNameInput.current.value = item.name;
-                                  editItemPriceInput.current.value =
-                                    item.price.toString();
-                                  editItemInventoryInput.current.value =
-                                    item.inventory?.toString() ?? "";
-                                }
-                              }}
-                            >
-                              <MdEdit color={"#6f7687"} size={"1.1rem"} />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setItemName(item.name);
-                                setItemUid(item.item_uid);
-                                const modalElement = (document.getElementById(
-                                  "delete_item_modal",
-                                ) as HTMLDialogElement)!;
-                                modalElement.showModal();
-                              }}
-                            >
-                              <MdDelete color={"#6f7687"} size={"1.1rem"} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                                  setItemUid(item.item_uid);
+                                  const modalElement = (document.getElementById(
+                                    "delete_item_modal",
+                                  ) as HTMLDialogElement)!;
+                                  modalElement.showModal();
+                                }}
+                              >
+                                <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -310,7 +317,9 @@ const Items = () => {
             </div>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
-                <button className="btn border-none">cancel</button>
+                <button className="btn border-none" onClick={clearStates}>
+                  cancel
+                </button>
                 <div
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"

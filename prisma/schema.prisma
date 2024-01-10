@@ -89,13 +89,13 @@ model orders {
   date          DateTime      @db.Timestamptz(6)
   amount_due    Decimal       @db.Decimal(15, 3)
   note          String?
-  user_uid      String?       @db.Uuid
-  payment_mode  Payment_mode?
+  user_uid      String        @db.Uuid
+  payment_mode  Payment_mode
   delivery_mode Delivery_mode
   paid          Boolean       @default(false)
   deleted       Boolean       @default(false)
   item_order    item_order[]
-  users         users?        @relation(fields: [user_uid], references: [user_uid], onDelete: NoAction, onUpdate: NoAction)
+  users         users         @relation(fields: [user_uid], references: [user_uid], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model users {
