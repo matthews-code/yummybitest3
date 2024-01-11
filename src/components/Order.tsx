@@ -48,7 +48,7 @@ const Order = () => {
 
   const invalidDateText = useRef<HTMLParagraphElement>(null);
   const userSearchInput = useRef<HTMLInputElement>(null);
-  const costumerSearchDiv = useRef<HTMLDivElement>(null);
+  const customerSearchDiv = useRef<HTMLDivElement>(null);
   const itemQuantityInput = useRef<HTMLInputElement>(null);
   const itemMultiplierInput = useRef<HTMLInputElement>(null);
 
@@ -57,9 +57,9 @@ const Order = () => {
 
   const [addOrderStep, setAddOrderStep] = useState(1);
 
-  const [costumerUid, setCostumerUid] = useState<string>("");
-  const [costumerSearch, setCostumerSearch] = useState<string>("");
-  const [selectedCostumer, setSelectedCostumer] = useState<string>();
+  const [customerUid, setCustomerUid] = useState<string>("");
+  const [customerSearch, setCustomerSearch] = useState<string>("");
+  const [selectedCustomer, setSelectedCustomer] = useState<string>();
 
   const [currDate, setCurrDate] = useState(dayjs().toDate());
   const [addDate, setAddDate] = useState<string>(dayjs().toISOString());
@@ -141,13 +141,13 @@ const Order = () => {
 
   const clearStates = () => {
     setAddDate(dayjs().toISOString());
-    setSelectedCostumer(undefined);
+    setSelectedCustomer(undefined);
     setItemOrders([]);
     setPaymentMode("Cash");
     setDeliveryMode("Pickup");
     setAddNotes("");
-    setCostumerSearch("");
-    setCostumerUid("");
+    setCustomerSearch("");
+    setCustomerUid("");
     setItemUid("");
     setSelectedItem("");
     setOrderUid("");
@@ -162,9 +162,9 @@ const Order = () => {
     setAddDate(dayjs(order.date).toISOString());
 
     if (user) {
-      setCostumerUid(user.user_uid);
-      setSelectedCostumer(user.contact_num);
-      setCostumerSearch(`${user.first_name} ${user.last_name}`);
+      setCustomerUid(user.user_uid);
+      setSelectedCustomer(user.contact_num);
+      setCustomerSearch(`${user.first_name} ${user.last_name}`);
     }
 
     const itemOrders = order.item_order.map((itemorder) => {
@@ -196,7 +196,7 @@ const Order = () => {
     }
 
     if (addOrderStep === 2) {
-      checkErrorCostumer();
+      checkErrorCustomer();
     }
 
     if (addOrderStep === 3) {
@@ -210,6 +210,14 @@ const Order = () => {
     if (addOrderStep === 4 && !isAddingOrder) {
       editOrder();
     }
+
+    if (addOrderStep === 10) {
+      checkAddUser();
+    }
+  };
+
+  const checkAddUser = () => {
+    setAddOrderStep(3);
   };
 
   const checkErrorDate = () => {
@@ -220,8 +228,8 @@ const Order = () => {
     }
   };
 
-  const checkErrorCostumer = () => {
-    if (selectedCostumer !== undefined) {
+  const checkErrorCustomer = () => {
+    if (selectedCustomer !== undefined) {
       setAddOrderStep(addOrderStep + 1);
     } else {
       userSearchInput.current?.classList.add("input-error");
@@ -287,7 +295,7 @@ const Order = () => {
       payment_mode: paymentMode as "Gcash" | "BPI" | "Cash",
       delivery_mode: deliveryMode as "Delivery" | "Pickup",
       note: addNotes,
-      user_uid: costumerUid,
+      user_uid: customerUid,
       item_order: itemOrders.map((itemOrder) => {
         return {
           item_uid: itemOrder.itemUid,
@@ -313,7 +321,7 @@ const Order = () => {
       payment_mode: paymentMode as "Gcash" | "BPI" | "Cash",
       delivery_mode: deliveryMode as "Delivery" | "Pickup",
       note: addNotes,
-      user_uid: costumerUid,
+      user_uid: customerUid,
       item_order: itemOrders.map((itemOrder) => {
         return {
           item_uid: itemOrder.itemUid,
@@ -606,14 +614,14 @@ const Order = () => {
                     Selected:{" "}
                     <span className="italic">
                       {users?.find((user) => {
-                        return user.contact_num === selectedCostumer;
+                        return user.contact_num === selectedCustomer;
                       })
                         ? users?.find((user) => {
-                            return user.contact_num === selectedCostumer;
+                            return user.contact_num === selectedCustomer;
                           })?.first_name +
                           " " +
                           users?.find((user) => {
-                            return user.contact_num === selectedCostumer;
+                            return user.contact_num === selectedCustomer;
                           })?.last_name
                         : "None"}
                     </span>
@@ -623,43 +631,43 @@ const Order = () => {
                   type="text"
                   ref={userSearchInput}
                   placeholder="Search using name or contact number"
-                  value={costumerSearch}
+                  value={customerSearch}
                   className="z-1 input input-bordered input-md w-full"
                   onChange={(e) => {
                     userSearchInput.current?.classList.remove("input-error");
-                    setCostumerSearch(e.currentTarget.value);
-                    costumerSearchDiv.current?.classList.remove("hidden");
+                    setCustomerSearch(e.currentTarget.value);
+                    customerSearchDiv.current?.classList.remove("hidden");
                   }}
                 />
                 <div
-                  ref={costumerSearchDiv}
+                  ref={customerSearchDiv}
                   className="hidden max-h-36 overflow-y-auto rounded-b-lg border border-t-0 border-gray-300"
                 >
-                  {costumerSearch !== "" &&
+                  {customerSearch !== "" &&
                     users
                       ?.filter((user) => {
                         if (
                           user.first_name
                             .toLowerCase()
-                            .startsWith(costumerSearch.toLowerCase())
+                            .startsWith(customerSearch.toLowerCase())
                         ) {
                           return true;
                         }
                         if (
                           user.last_name
                             ?.toLowerCase()
-                            .startsWith(costumerSearch.toLowerCase())
+                            .startsWith(customerSearch.toLowerCase())
                         ) {
                           return true;
                         }
                         if (
                           `${user.first_name.toLowerCase()} ${user.last_name?.toLowerCase()}`.startsWith(
-                            costumerSearch.toLowerCase(),
+                            customerSearch.toLowerCase(),
                           )
                         ) {
                           return true;
                         }
-                        if (user.contact_num.startsWith(costumerSearch)) {
+                        if (user.contact_num.startsWith(customerSearch)) {
                           return true;
                         }
 
@@ -677,12 +685,12 @@ const Order = () => {
                             key={user.user_uid}
                             className="flex justify-between px-4 py-2 hover:bg-slate-100"
                             onClick={() => {
-                              setCostumerUid(user.user_uid);
-                              setSelectedCostumer(user.contact_num);
-                              setCostumerSearch(
+                              setCustomerUid(user.user_uid);
+                              setSelectedCustomer(user.contact_num);
+                              setCustomerSearch(
                                 `${user.first_name} ${user.last_name}`,
                               );
-                              costumerSearchDiv.current?.classList.add(
+                              customerSearchDiv.current?.classList.add(
                                 "hidden",
                               );
                             }}
@@ -810,7 +818,7 @@ const Order = () => {
                           key={itemOrder.itemName}
                           className="flex justify-between"
                         >
-                          <p className="text-s m">
+                          <p className="text-sm">
                             {itemOrder.itemName} • {itemOrder.quantity} x{" "}
                             {itemOrder.multiplier}
                           </p>
@@ -907,6 +915,11 @@ const Order = () => {
                 </div>
               </>
             )}
+            {addOrderStep === 10 && (
+              <>
+                <p>add user</p>
+              </>
+            )}
             <div className="modal-action">
               <form
                 method="dialog"
@@ -923,12 +936,27 @@ const Order = () => {
                   cancel
                 </button>
                 <div className="flex gap-2">
+                  {addOrderStep === 2 && (
+                    <div
+                      tabIndex={0}
+                      className="btn border-none"
+                      onClick={() => {
+                        setAddOrderStep(10);
+                      }}
+                    >
+                      add customer
+                    </div>
+                  )}
                   {addOrderStep > 1 && (
                     <div
                       tabIndex={0}
                       className="btn border-none"
                       onClick={() => {
-                        setAddOrderStep(addOrderStep - 1);
+                        if (addOrderStep === 10) {
+                          setAddOrderStep(2);
+                        } else {
+                          setAddOrderStep(addOrderStep - 1);
+                        }
                       }}
                     >
                       back
