@@ -424,18 +424,18 @@ const Order = () => {
                         </h1>
                         <p className="text-sm text-[#707070]">
                           {/* UNCOMMENT AFTER FIX {order.delivery_mode} at{" "} */}
-                          {/* {dayjs
-                            .utc(order.date)
-                            .tz("Asia/Manila")
-                            .format("MMM DD YYYY h:mm A")} */}
-                          {dayjs(order.date).toString()}
+                          {"PHT\t" +
+                            dayjs
+                              .utc(order.date)
+                              .tz("Asia/Manila")
+                              .format("MMM DD YYYY h:mm A Z")}
                         </p>
                         <p className="text-sm text-[#707070]">
                           {/* UNCOMMENT AFTER FIX {order.delivery_mode} at{" "} */}
-                          {dayjs
-                            .utc(order.date)
-                            .tz("Asia/Manila")
-                            .format("MMM DD YYYY h:mm A Z")}
+                          {"GMT\t" +
+                            dayjs
+                              .utc(order.date)
+                              .format("MMM DD YYYY h:mm A Z")}
                         </p>
                       </div>
                       <div className="text-right">
