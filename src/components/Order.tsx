@@ -62,7 +62,7 @@ const Order = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<string>();
 
   const [currDate, setCurrDate] = useState(dayjs().toDate());
-  const [addDate, setAddDate] = useState<string>(dayjs().toISOString());
+  const [addDate, setAddDate] = useState<string>();
 
   const [itemUid, setItemUid] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
@@ -140,7 +140,7 @@ const Order = () => {
   });
 
   const clearStates = () => {
-    setAddDate(dayjs().toISOString());
+    setAddDate(undefined);
     setSelectedCustomer(undefined);
     setItemOrders([]);
     setPaymentMode("Cash");
@@ -221,7 +221,7 @@ const Order = () => {
   };
 
   const checkErrorDate = () => {
-    if (addDate !== "") {
+    if (addDate !== undefined) {
       setAddOrderStep(addOrderStep + 1);
     } else {
       invalidDateText.current?.classList.remove("hidden");
@@ -566,7 +566,7 @@ const Order = () => {
                 </div>
                 <DateTimeField
                   className="w-full"
-                  value={dayjs(addDate)}
+                  value={addDate === undefined ? null : dayjs(addDate)}
                   clearable={true}
                   disablePast={true}
                   slotProps={{
@@ -591,9 +591,9 @@ const Order = () => {
                     if (value) {
                       value?.isValid()
                         ? setAddDate(value.toDate().toISOString())
-                        : setAddDate("");
+                        : null;
                     } else {
-                      setAddDate("");
+                      setAddDate(undefined);
                     }
                     invalidDateText.current?.classList.add("hidden");
                   }}
