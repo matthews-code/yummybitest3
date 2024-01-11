@@ -133,24 +133,21 @@ export const orderRouter = createTRPCRouter({
   getAllOrders: userRoleProcedure
     .input(z.object({ date: z.date() }))
     .query(({ ctx, input }) => {
-      // console.log(dayjs(input.date).toDate());
-      // console.log(input.date);
-
-      console.log(
-        dayjs
-          .utc(input.date)
-          .tz("Asia/Manila")
-          .add(1, "day")
-          .startOf("d")
-          .format("MMM DD YYYY h:mm A"),
-      );
-      console.log(
-        dayjs
-          .utc(input.date)
-          .tz("Asia/Manila")
-          .startOf("d")
-          .format("MMM DD YYYY h:mm A"),
-      );
+      // console.log(
+      //   dayjs
+      //     .utc(input.date)
+      //     .tz("Asia/Manila")
+      //     .add(1, "day")
+      //     .startOf("d")
+      //     .format("MMM DD YYYY h:mm A"),
+      // );
+      // console.log(
+      //   dayjs
+      //     .utc(input.date)
+      //     .tz("Asia/Manila")
+      //     .startOf("d")
+      //     .format("MMM DD YYYY h:mm A"),
+      // );
 
       return ctx.db.orders.findMany({
         where: {

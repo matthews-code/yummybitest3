@@ -111,7 +111,7 @@ const Users = () => {
       return false;
     }
 
-    console.log(contactNum);
+    // console.log(contactNum);
 
     if (contactNum.length !== 12) {
       userContactNumInput.current?.classList.add("input-error");
