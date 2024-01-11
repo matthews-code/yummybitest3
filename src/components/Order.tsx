@@ -423,17 +423,11 @@ const Order = () => {
                           }
                         </h1>
                         <p className="text-sm text-[#707070]">
-                          {/* {
-                        users?.find((user) => {
-                          return order.user_uid === user.user_uid;
-                        })?.contact_num
-                      }{" "}
-                      •  */}
-                          {order.delivery_mode} at{" "}
+                          {/* UNCOMMENT AFTER FIX {order.delivery_mode} at{" "} */}
                           {dayjs
                             .utc(order.date)
                             .tz("Asia/Manila")
-                            .format("h:mm A")}
+                            .format("MMM DD YYYY h:mm A")}
                         </p>
                       </div>
                       <div className="text-right">

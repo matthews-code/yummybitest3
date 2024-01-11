@@ -136,8 +136,21 @@ export const orderRouter = createTRPCRouter({
       // console.log(dayjs(input.date).toDate());
       // console.log(input.date);
 
-      // console.log(dayjs(input.date).startOf("d").toDate());
-      // console.log(dayjs(input.date).add(1, "day").startOf("d").toDate());
+      console.log(
+        dayjs
+          .utc(input.date)
+          .tz("Asia/Manila")
+          .add(1, "day")
+          .startOf("d")
+          .format("MMM DD YYYY h:mm A"),
+      );
+      console.log(
+        dayjs
+          .utc(input.date)
+          .tz("Asia/Manila")
+          .startOf("d")
+          .format("MMM DD YYYY h:mm A"),
+      );
 
       return ctx.db.orders.findMany({
         where: {
