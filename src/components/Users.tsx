@@ -1,25 +1,30 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Role } from "@prisma/client";
 import { FaPlus } from "react-icons/fa6";
 import { MdDelete, MdEdit } from "react-icons/md";
 
+interface user {
+  user_uid: string;
+  first_name: string;
+  last_name: string | null;
+  contact_num: string;
+  address: string | null;
+  deleted: boolean;
+}
+
 const Users = () => {
   const role = useSession().data?.user.role;
 
   const duplicateNumberText = useRef<HTMLParagraphElement>(null);
-  const editDuplicateNumberText = useRef<HTMLParagraphElement>(null);
 
   const userFirstNameInput = useRef<HTMLInputElement>(null);
   const userLastNameInput = useRef<HTMLInputElement>(null);
   const userContactNumInput = useRef<HTMLInputElement>(null);
   const userAddressInput = useRef<HTMLInputElement>(null);
 
-  const editUserFirstNameInput = useRef<HTMLInputElement>(null);
-  const editUserLastNameInput = useRef<HTMLInputElement>(null);
-  const editUserContactNumInput = useRef<HTMLInputElement>(null);
-  const editUserAddressInput = useRef<HTMLInputElement>(null);
+  const [isAddingUser, setIsAddingUser] = useState(true);
 
   const [searchInput, setSearchInput] = useState<string>("");
 
@@ -56,11 +61,17 @@ const Users = () => {
     setUserContactNum("");
     setUserAddress("");
     setUserUid("");
-    duplicateNumberText.current?.classList.add("hidden");
-    editDuplicateNumberText.current?.classList.add("hidden");
   };
 
-  const formatContact = (number: string) => {
+  const setStates = (user: user) => {
+    setUserUid(user.user_uid);
+    setUserFirstName(user.first_name);
+    setUserLastName(user.last_name ?? "");
+    setUserContactNum(user.contact_num);
+    setUserAddress(user.address ?? "");
+  };
+
+  const cleanContact = (number: string) => {
     const newNumber = number
       .replace(" ", "")
       .replace("+", "")
@@ -70,24 +81,21 @@ const Users = () => {
     return newNumber;
   };
 
-  const checkErrors = (
-    firstName: string,
-    lastName: string,
-    contactNum: string,
-    address: string,
-    addUser: boolean,
-  ) => {
-    if (firstName === "") {
-      addUser
-        ? userFirstNameInput.current?.classList.add("input-error")
-        : editUserFirstNameInput.current?.classList.add("input-error");
+  const formatContact = (contactNum: string) => {
+    if (contactNum.length === 11 && contactNum.startsWith("0")) {
+      return "63" + contactNum.slice(1);
+    }
+    return contactNum;
+  };
+
+  const checkErrors = (contactNum: string) => {
+    if (userFirstName === "") {
+      userFirstNameInput.current?.classList.add("input-error");
       return false;
     }
 
     if (contactNum === "") {
-      addUser
-        ? userContactNumInput.current?.classList.add("input-error")
-        : editUserContactNumInput.current?.classList.add("input-error");
+      userContactNumInput.current?.classList.add("input-error");
       return false;
     }
 
@@ -99,67 +107,76 @@ const Users = () => {
           user.deleted === false,
       )
     ) {
-      addUser
-        ? duplicateNumberText.current?.classList.remove("hidden")
-        : editDuplicateNumberText.current?.classList.remove("hidden");
+      duplicateNumberText.current?.classList.remove("hidden");
+      return false;
+    }
+
+    console.log(contactNum);
+
+    if (contactNum.length !== 12) {
+      userContactNumInput.current?.classList.add("input-error");
       return false;
     }
 
     return true;
   };
 
-  const modalBehaviour = (addItem: boolean) => {
-    const elementId = addItem ? "add_user_modal" : "edit_user_modal";
+  const modalBehaviour = () => {
     const modalElement = (document.getElementById(
-      elementId,
+      "add_user_modal",
     ) as HTMLDialogElement)!;
 
     modalElement.close();
   };
 
-  const addUser = (
-    firstName: string,
-    lastName: string,
-    contactNum: string,
-    address: string,
-    addUser: boolean,
-  ) => {
-    if (checkErrors(firstName, lastName, contactNum, address, addUser)) {
+  const addUser = (contactNumber: string) => {
+    const formattedContactNumber = formatContact(contactNumber);
+
+    if (checkErrors(formattedContactNumber)) {
       addUserEndpoint.mutate({
-        firstName: firstName,
-        lastName: lastName,
-        contactNum: contactNum,
-        address: address,
+        firstName: userFirstName,
+        lastName: userLastName,
+        contactNum: formattedContactNumber,
+        address: userAddress,
       });
       clearStates();
-      modalBehaviour(addUser);
+      modalBehaviour();
     }
   };
 
-  const editUser = (
-    firstName: string,
-    lastName: string,
-    contactNum: string,
-    address: string,
-    addUser: boolean,
-  ) => {
-    if (checkErrors(firstName, lastName, contactNum, address, addUser)) {
+  const editUser = (contactNumber: string) => {
+    const formattedContactNumber = formatContact(contactNumber);
+
+    if (checkErrors(formattedContactNumber)) {
       editUserEndpoint.mutate({
         uid: userUid,
-        firstName: firstName,
-        lastName: lastName,
-        contactNum: contactNum,
-        address: address,
+        firstName: userFirstName,
+        lastName: userLastName,
+        contactNum: formattedContactNumber,
+        address: userAddress,
       });
       clearStates();
-      modalBehaviour(addUser);
-      editDuplicateNumberText.current?.classList.add("hidden");
+      modalBehaviour();
     }
   };
 
   const deleteUser = () => {
     deleteUserEndpoint.mutate({ uid: userUid });
     clearStates();
+  };
+
+  const manipulateContactNumber = (contactNum: string) => {
+    return (
+      "(+" +
+      contactNum.slice(0, 2) +
+      ")" +
+      " " +
+      contactNum.slice(2, 5) +
+      " " +
+      contactNum.slice(5, 8) +
+      " " +
+      contactNum.slice(8)
+    );
   };
 
   return (
@@ -220,7 +237,7 @@ const Users = () => {
                         href={`tel:${user.contact_num}`}
                         className="text-sm italic text-blue-600 underline"
                       >
-                        {user.contact_num}
+                        {manipulateContactNumber(user.contact_num)}
                       </a>
                     </p>
                     <p>{user.address}</p>
@@ -231,33 +248,13 @@ const Users = () => {
                       <div className="flex gap-2 self-center">
                         <button
                           onClick={() => {
+                            setStates(user);
+                            setIsAddingUser(false);
+
                             const modalElement = (document.getElementById(
-                              "edit_user_modal",
+                              "add_user_modal",
                             ) as HTMLDialogElement)!;
                             modalElement.showModal();
-
-                            if (
-                              editUserFirstNameInput.current !== null &&
-                              editUserLastNameInput.current !== null &&
-                              editUserContactNumInput.current !== null &&
-                              editUserAddressInput.current !== null
-                            ) {
-                              setUserUid(user.user_uid);
-
-                              setUserFirstName(user.first_name);
-                              setUserLastName(user.last_name ?? "");
-                              setUserContactNum(user.contact_num);
-                              setUserAddress(user.address ?? "");
-
-                              editUserFirstNameInput.current.value =
-                                user.first_name;
-                              editUserLastNameInput.current.value =
-                                user.last_name ?? "";
-                              editUserContactNumInput.current.value =
-                                user.contact_num;
-                              editUserAddressInput.current.value =
-                                user.address ?? "";
-                            }
                           }}
                         >
                           <MdEdit color={"#6f7687"} size={"1.2rem"} />
@@ -290,7 +287,9 @@ const Users = () => {
 
         <dialog id="add_user_modal" className="modal modal-top sm:modal-middle">
           <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Add Customer</h1>
+            <h1 className="text-lg font-bold">
+              {isAddingUser ? "Add Customer" : "Edit Customer"}
+            </h1>
             <div className="divider m-0 p-0"></div>
             <div className="flex gap-4">
               <div className="w-full">
@@ -349,7 +348,7 @@ const Users = () => {
                     return;
                   }
 
-                  const formattedContact = formatContact(e.currentTarget.value);
+                  const formattedContact = cleanContact(e.currentTarget.value);
 
                   setUserContactNum(formattedContact);
                   userContactNumInput.current?.classList.remove("input-error");
@@ -375,154 +374,14 @@ const Users = () => {
             </div>
             <div className="modal-action">
               <form method="dialog" className="flex gap-2">
-                <button className="btn border-none" onClick={clearStates}>
-                  cancel
-                </button>
-                <div
-                  tabIndex={0}
-                  className="btn border-none bg-yellow-200 hover:bg-yellow-300"
-                  onClick={() => {
-                    let formattedContact = "";
-                    if (
-                      userContactNum.length === 11 &&
-                      userContactNum.startsWith("0")
-                    ) {
-                      // console.log("63" + userContactNum.slice(1));
-                      formattedContact = "63" + userContactNum.slice(1);
-                    } else {
-                      formattedContact = userContactNum;
-                    }
-
-                    addUser(
-                      userFirstName,
-                      userLastName,
-                      formattedContact,
-                      userAddress,
-                      true,
-                    );
-                  }}
-                >
-                  add
-                </div>
-              </form>
-            </div>
-          </div>
-        </dialog>
-
-        {/* EDIT USER MODAL */}
-
-        <dialog
-          id="edit_user_modal"
-          className="modal modal-top sm:modal-middle"
-        >
-          <div className="modal-box p-5">
-            <h1 className="text-lg font-bold">Edit Customer</h1>
-            <div className="divider m-0 p-0"></div>
-            <div className="mt-2 flex gap-4">
-              <div className="w-full">
-                <div className="label">
-                  <span className="label-text">First name</span>
-                </div>
-                <input
-                  id="edit-user-first-name-input"
-                  ref={editUserFirstNameInput}
-                  type="text"
-                  className="input input-bordered input-md w-full"
-                  onChange={(e) => {
-                    setUserFirstName(e.currentTarget.value);
-                    editUserFirstNameInput.current?.classList.remove(
-                      "input-error",
-                    );
-                  }}
-                />
-              </div>
-              <div className="w-full">
-                <div className="label">
-                  <span className="label-text">
-                    Last name - <i className="text-sm">Optional</i>
-                  </span>
-                </div>
-                <input
-                  id="edit-user-last-name-input"
-                  ref={editUserLastNameInput}
-                  type="text"
-                  className="input input-bordered input-md w-full"
-                  onChange={(e) => setUserLastName(e.currentTarget.value)}
-                />
-              </div>
-            </div>
-            <div className="mt-2">
-              <div className="label">
-                <span className="label-text">
-                  Contact Number{" "}
-                  <i
-                    ref={editDuplicateNumberText}
-                    className="hidden text-red-600"
-                  >
-                    (number is already taken)
-                  </i>
-                </span>
-              </div>
-              <input
-                id="edit-user-contact-number-input"
-                ref={editUserContactNumInput}
-                type="text"
-                value={userContactNum}
-                className="input input-bordered input-md w-full"
-                onChange={(e) => {
-                  if (!/^[+()0-9- ]*/.test(e.currentTarget.value)) {
-                    editUserContactNumInput.current?.classList.add(
-                      "input-error",
-                    );
-                    return;
-                  }
-
-                  const editFormattedContact = formatContact(
-                    e.currentTarget.value,
-                  );
-
-                  setUserContactNum(editFormattedContact);
-                  editUserContactNumInput.current?.classList.remove(
-                    "input-error",
-                  );
-                  editDuplicateNumberText.current?.classList.add("hidden");
-                }}
-              />
-            </div>
-            <div className="mt-2">
-              <div className="label">
-                <span className="label-text">
-                  Address - <i className="text-sm">Optional</i>
-                </span>
-              </div>
-              <input
-                id="edit-user-address-input"
-                ref={editUserAddressInput}
-                type="text"
-                className="input input-bordered input-md w-full"
-                onChange={(e) => setUserAddress(e.currentTarget.value)}
-              />
-            </div>
-            <div className="modal-action">
-              <form method="dialog" className="flex gap-2">
                 <button
                   className="btn border-none"
                   onClick={() => {
-                    editUserFirstNameInput.current?.classList.remove(
+                    duplicateNumberText.current?.classList.add("hidden");
+                    userContactNumInput.current?.classList.remove(
                       "input-error",
                     );
-                    editUserLastNameInput.current?.classList.remove(
-                      "input-error",
-                    );
-                    editUserContactNumInput.current?.classList.remove(
-                      "input-error",
-                    );
-                    editUserAddressInput.current?.classList.remove(
-                      "input-error",
-                    );
-                    editDuplicateNumberText.current?.classList.add("hidden");
-
-                    clearStates();
+                    clearStates;
                   }}
                 >
                   cancel
@@ -531,27 +390,12 @@ const Users = () => {
                   tabIndex={0}
                   className="btn border-none bg-yellow-200 hover:bg-yellow-300"
                   onClick={() => {
-                    let formattedContact = "";
-                    if (
-                      userContactNum.length === 11 &&
-                      userContactNum.startsWith("0")
-                    ) {
-                      // console.log("63" + userContactNum.slice(1));
-                      formattedContact = "63" + userContactNum.slice(1);
-                    } else {
-                      formattedContact = userContactNum;
-                    }
-
-                    editUser(
-                      userFirstName,
-                      userLastName,
-                      formattedContact,
-                      userAddress,
-                      false,
-                    );
+                    isAddingUser
+                      ? addUser(userContactNum)
+                      : editUser(userContactNum);
                   }}
                 >
-                  save
+                  {isAddingUser ? "add" : "save"}
                 </div>
               </form>
             </div>
@@ -590,6 +434,7 @@ const Users = () => {
           <button
             className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
             onClick={() => {
+              setIsAddingUser(true);
               const modalElement = (document.getElementById(
                 "add_user_modal",
               ) as HTMLDialogElement)!;

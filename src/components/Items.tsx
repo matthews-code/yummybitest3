@@ -12,6 +12,7 @@ interface item {
   item_uid: string;
   name: string;
   price: Decimal;
+  bulk_price: Decimal;
   serving: Decimal;
   inventory: Decimal | null;
   created_at: Date;
@@ -21,12 +22,12 @@ interface item {
 const Items = () => {
   const role = useSession().data?.user.role;
 
+  const duplicateNameText = useRef<HTMLParagraphElement>(null);
+
   const itemNameInput = useRef<HTMLInputElement>(null);
   const itemPriceInput = useRef<HTMLInputElement>(null);
   const itemServingInput = useRef<HTMLInputElement>(null);
   const itemInventoryInput = useRef<HTMLInputElement>(null);
-
-  const duplicateNameText = useRef<HTMLParagraphElement>(null);
 
   const [isAddingItem, setIsAddingItem] = useState(true);
 
@@ -69,7 +70,7 @@ const Items = () => {
     setItemUid(item.item_uid);
 
     setItemName(item.name);
-    setItemPrice(item.price.toString());
+    setItemPrice(item.bulk_price.toString());
     setItemInventory(item.inventory?.toString() ?? "");
     setItemServing(item.serving.toString());
   };
@@ -91,7 +92,10 @@ const Items = () => {
     }
 
     if (
-      items?.some((item) => item.name === itemName && item.item_uid !== itemUid)
+      items?.some(
+        (item) =>
+          item.name === itemName && item.item_uid !== itemUid && !item.deleted,
+      )
     ) {
       duplicateNameText.current?.classList.remove("hidden");
       return false;
@@ -112,7 +116,8 @@ const Items = () => {
     if (checkErrors()) {
       addItemEndpoint.mutate({
         name: itemName,
-        price: Number(itemPrice),
+        price: Number(itemPrice) / Number(itemServing),
+        bulkPrice: Number(itemPrice),
         inventory: itemInventory === "" ? null : Number(itemInventory),
         serving: Number(itemServing),
       });
@@ -126,7 +131,8 @@ const Items = () => {
       editItemEndpoint.mutate({
         uid: itemUid,
         name: itemName,
-        price: Number(itemPrice),
+        price: Number(itemPrice) / Number(itemServing),
+        bulkPrice: Number(itemPrice),
         inventory: itemInventory === "" ? null : Number(itemInventory),
         serving: Number(itemServing),
       });
@@ -177,7 +183,7 @@ const Items = () => {
                         <tr key={item.item_uid}>
                           <td>{item.name}</td>
                           <td>
-                            {item.price.toString()} /{" "}
+                            {item.bulk_price.toString()} /{" "}
                             {item.serving.toString() +
                               (Number(item.serving) > 1 ? "pcs." : "pc.")}
                           </td>
@@ -333,6 +339,7 @@ const Items = () => {
                 <button
                   className="btn border-none"
                   onClick={() => {
+                    duplicateNameText.current?.classList.add("hidden");
                     itemNameInput.current?.classList.remove("input-error");
                     itemInventoryInput.current?.classList.remove("input-error");
                     itemPriceInput.current?.classList.remove("input-error");

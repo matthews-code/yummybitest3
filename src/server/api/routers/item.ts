@@ -15,6 +15,7 @@ export const itemRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         price: z.number(),
+        bulkPrice: z.number(),
         inventory: z.number().int().nullable(),
         serving: z.number(),
       }),
@@ -24,6 +25,7 @@ export const itemRouter = createTRPCRouter({
         data: {
           name: input.name,
           price: input.price,
+          bulk_price: input.bulkPrice,
           inventory: input.inventory ?? null,
           serving: input.serving,
           created_at: dayjs().toISOString(),
@@ -37,6 +39,7 @@ export const itemRouter = createTRPCRouter({
         uid: z.string(),
         name: z.string(),
         price: z.number(),
+        bulkPrice: z.number(),
         inventory: z.number().int().nullable(),
         serving: z.number(),
       }),
@@ -49,6 +52,7 @@ export const itemRouter = createTRPCRouter({
         data: {
           name: input.name,
           price: input.price,
+          bulk_price: input.bulkPrice,
           inventory: input.inventory ?? null,
           serving: input.serving,
         },
@@ -63,6 +67,7 @@ export const itemRouter = createTRPCRouter({
           item_uid: input.uid,
         },
         data: {
+          name: input.uid,
           deleted: true,
         },
       });

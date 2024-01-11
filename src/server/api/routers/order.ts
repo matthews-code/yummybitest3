@@ -21,7 +21,11 @@ export const orderRouter = createTRPCRouter({
         note: z.string(),
         user_uid: z.string(),
         item_order: z.array(
-          z.object({ item_uid: z.string(), quantity: z.number() }),
+          z.object({
+            item_uid: z.string(),
+            quantity: z.number(),
+            multiplier: z.number(),
+          }),
         ),
       }),
     )
@@ -38,6 +42,7 @@ export const orderRouter = createTRPCRouter({
             create: input.item_order.map((inputOrder) => ({
               item_uid: inputOrder.item_uid,
               quantity: inputOrder.quantity,
+              multiplier: inputOrder.multiplier,
             })),
           },
         },
@@ -55,7 +60,11 @@ export const orderRouter = createTRPCRouter({
         note: z.string(),
         user_uid: z.string(),
         item_order: z.array(
-          z.object({ item_uid: z.string(), quantity: z.number() }),
+          z.object({
+            item_uid: z.string(),
+            quantity: z.number(),
+            multiplier: z.number(),
+          }),
         ),
       }),
     )
@@ -81,6 +90,7 @@ export const orderRouter = createTRPCRouter({
             create: input.item_order.map((inputOrder) => ({
               item_uid: inputOrder.item_uid,
               quantity: inputOrder.quantity,
+              multiplier: inputOrder.multiplier,
             })),
           },
         },

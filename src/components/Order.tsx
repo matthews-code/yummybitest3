@@ -18,15 +18,17 @@ dayjs.extend(tz);
 interface itemOrder {
   itemUid: string;
   itemName: string;
-  itemPrice: string;
+  itemPrice: number;
   quantity: number;
+  multiplier: number;
 }
 
 interface order {
   item_order: {
     order_uid: string;
     item_uid: string;
-    quantity: bigint;
+    quantity: Decimal;
+    multiplier: Decimal;
   }[];
   order_uid: string;
   date: Date;
@@ -48,6 +50,7 @@ const Order = () => {
   const userSearchInput = useRef<HTMLInputElement>(null);
   const costumerSearchDiv = useRef<HTMLDivElement>(null);
   const itemQuantityInput = useRef<HTMLInputElement>(null);
+  const itemMultiplierInput = useRef<HTMLInputElement>(null);
 
   const [orderUid, setOrderUid] = useState("");
   const [isAddingOrder, setIsAddingOrder] = useState(true);
@@ -59,11 +62,12 @@ const Order = () => {
   const [selectedCostumer, setSelectedCostumer] = useState<string>();
 
   const [currDate, setCurrDate] = useState(dayjs().toDate());
-  const [addDate, setAddDate] = useState<string>();
+  const [addDate, setAddDate] = useState<string>(dayjs().toISOString());
 
   const [itemUid, setItemUid] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
   const [itemQuantity, setItemQuantity] = useState<string>("");
+  const [itemMultiplier, setItemMultiplier] = useState<string>("1");
   const [selectedItem, setSelectedItem] = useState<string>("");
 
   const [paymentMode, setPaymentMode] = useState<string>(Payment_mode.Cash);
@@ -136,7 +140,7 @@ const Order = () => {
   });
 
   const clearStates = () => {
-    setAddDate(undefined);
+    setAddDate(dayjs().toISOString());
     setSelectedCostumer(undefined);
     setItemOrders([]);
     setPaymentMode("Cash");
@@ -171,8 +175,9 @@ const Order = () => {
       return {
         itemUid: item?.item_uid,
         itemName: item?.name,
-        itemPrice: item?.price.toString(),
+        itemPrice: Number(item?.price),
         quantity: Number(itemorder.quantity),
+        multiplier: Number(itemorder.multiplier),
       } as itemOrder;
     });
 
@@ -208,7 +213,7 @@ const Order = () => {
   };
 
   const checkErrorDate = () => {
-    if (addDate !== undefined) {
+    if (addDate !== "") {
       setAddOrderStep(addOrderStep + 1);
     } else {
       invalidDateText.current?.classList.remove("hidden");
@@ -218,6 +223,8 @@ const Order = () => {
   const checkErrorCostumer = () => {
     if (selectedCostumer !== undefined) {
       setAddOrderStep(addOrderStep + 1);
+    } else {
+      userSearchInput.current?.classList.add("input-error");
     }
   };
 
@@ -236,25 +243,27 @@ const Order = () => {
       return;
     }
 
-    if (itemQuantity === "" || !/^\d*$/.test(itemQuantity)) {
+    if (itemQuantity === "") {
       itemQuantityInput.current?.classList.add("input-error");
       return;
     }
 
-    // setItemQuantity("");
-    if (itemQuantityInput.current) {
-      itemQuantityInput.current.value = "";
+    if (itemMultiplier === "") {
+      itemMultiplierInput.current?.classList.add("input-error");
+      return;
     }
 
     setItemQuantity("");
+    setItemMultiplier("1");
 
     setItemOrders([
       ...itemOrders,
       {
         itemUid: itemUid,
         itemName: selectedItem,
-        itemPrice: itemPrice,
+        itemPrice: Number(itemPrice),
         quantity: Number(itemQuantity),
+        multiplier: Number(itemMultiplier),
       },
     ]);
   };
@@ -272,7 +281,7 @@ const Order = () => {
       date: addDate ? addDate : "",
       amount_due: itemOrders.reduce(
         (sum, itemOrder) =>
-          sum + Number(itemOrder.itemPrice) * itemOrder.quantity,
+          sum + itemOrder.itemPrice * itemOrder.quantity * itemOrder.multiplier,
         0,
       ),
       payment_mode: paymentMode as "Gcash" | "BPI" | "Cash",
@@ -280,7 +289,11 @@ const Order = () => {
       note: addNotes,
       user_uid: costumerUid,
       item_order: itemOrders.map((itemOrder) => {
-        return { item_uid: itemOrder.itemUid, quantity: itemOrder.quantity };
+        return {
+          item_uid: itemOrder.itemUid,
+          quantity: itemOrder.quantity,
+          multiplier: itemOrder.multiplier,
+        };
       }),
     });
     setAddOrderStep(1);
@@ -294,7 +307,7 @@ const Order = () => {
       date: addDate ? addDate : "",
       amount_due: itemOrders.reduce(
         (sum, itemOrder) =>
-          sum + Number(itemOrder.itemPrice) * itemOrder.quantity,
+          sum + itemOrder.itemPrice * itemOrder.quantity * itemOrder.multiplier,
         0,
       ),
       payment_mode: paymentMode as "Gcash" | "BPI" | "Cash",
@@ -302,7 +315,11 @@ const Order = () => {
       note: addNotes,
       user_uid: costumerUid,
       item_order: itemOrders.map((itemOrder) => {
-        return { item_uid: itemOrder.itemUid, quantity: itemOrder.quantity };
+        return {
+          item_uid: itemOrder.itemUid,
+          quantity: itemOrder.quantity,
+          multiplier: itemOrder.multiplier,
+        };
       }),
     });
     setAddOrderStep(1);
@@ -315,6 +332,22 @@ const Order = () => {
     clearStates();
   };
 
+  const manipulateContactNumber = (orderUid: string) => {
+    const user = users?.find((user) => orderUid === user.user_uid);
+
+    return (
+      "(+" +
+      user?.contact_num.slice(0, 2) +
+      ")" +
+      " " +
+      user?.contact_num.slice(2, 5) +
+      " " +
+      user?.contact_num.slice(5, 8) +
+      " " +
+      user?.contact_num.slice(8)
+    );
+  };
+
   const handleCheckboxClick = (orderId: string, paid: boolean) => {
     togglePaid.mutate({
       order_uid: orderId,
@@ -324,7 +357,7 @@ const Order = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
+      <div className="h-[calc(100vh-66px)] w-full max-w-3xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
         <MobileDatePicker
           className="self-center"
           // closeOnSelect={true}
@@ -397,7 +430,7 @@ const Order = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-medium">
-                          {`₱${order.amount_due.toString()}`}
+                          {`₱${Number(order.amount_due).toFixed(2)}`}
                         </p>
                         <p className="text-sm text-[#707070]">
                           {order.payment_mode} •{" "}
@@ -415,11 +448,7 @@ const Order = () => {
                           })?.contact_num}`}
                           className="text-sm italic text-blue-600 underline"
                         >
-                          {
-                            users?.find((user) => {
-                              return order.user_uid === user.user_uid;
-                            })?.contact_num
-                          }
+                          {manipulateContactNumber(order.user_uid)}
                         </a>
                       </p>
                       <p className="inline text-sm text-[#707070]">
@@ -449,8 +478,8 @@ const Order = () => {
                             }
                           </p>
                           <p className="text-sm text-[#707070]">
-                            {`${itemOrder.quantity}`}{" "}
-                            {itemOrder.quantity > 1 ? "pcs." : "pc."}
+                            {`${Number(itemOrder.quantity)}`} x{" "}
+                            {`${Number(itemOrder.multiplier)}`}
                           </p>
                         </div>
                       ))}
@@ -535,7 +564,7 @@ const Order = () => {
                 </div>
                 <DateTimeField
                   className="w-full"
-                  value={addDate === undefined ? null : dayjs(addDate)}
+                  value={dayjs(addDate)}
                   clearable={true}
                   disablePast={true}
                   slotProps={{
@@ -547,7 +576,7 @@ const Order = () => {
                     width: "100%",
                     ".MuiInputBase-input": {
                       letterSpacing: 0.5,
-                      fontSize: 15,
+                      fontSize: 16,
                       // fontFamily: "Segoe ui",
                     },
                     ".MuiInputBase-root": {
@@ -560,9 +589,9 @@ const Order = () => {
                     if (value) {
                       value?.isValid()
                         ? setAddDate(value.toDate().toISOString())
-                        : null;
+                        : setAddDate("");
                     } else {
-                      setAddDate(undefined);
+                      setAddDate("");
                     }
                     invalidDateText.current?.classList.add("hidden");
                   }}
@@ -573,6 +602,22 @@ const Order = () => {
               <>
                 <div className="label">
                   <span className="label-text">Customer</span>
+                  <span className="label-text-alt text-xs">
+                    Selected:{" "}
+                    <span className="italic">
+                      {users?.find((user) => {
+                        return user.contact_num === selectedCostumer;
+                      })
+                        ? users?.find((user) => {
+                            return user.contact_num === selectedCostumer;
+                          })?.first_name +
+                          " " +
+                          users?.find((user) => {
+                            return user.contact_num === selectedCostumer;
+                          })?.last_name
+                        : "None"}
+                    </span>
+                  </span>
                 </div>
                 <input
                   type="text"
@@ -581,6 +626,7 @@ const Order = () => {
                   value={costumerSearch}
                   className="z-1 input input-bordered input-md w-full"
                   onChange={(e) => {
+                    userSearchInput.current?.classList.remove("input-error");
                     setCostumerSearch(e.currentTarget.value);
                     costumerSearchDiv.current?.classList.remove("hidden");
                   }}
@@ -629,7 +675,7 @@ const Order = () => {
                         return (
                           <div
                             key={user.user_uid}
-                            className="flex justify-between px-4 py-2 focus:bg-slate-50"
+                            className="flex justify-between px-4 py-2 hover:bg-slate-100"
                             onClick={() => {
                               setCostumerUid(user.user_uid);
                               setSelectedCostumer(user.contact_num);
@@ -644,7 +690,17 @@ const Order = () => {
                             <p className="text-sm">
                               {user.first_name} {user.last_name}
                             </p>
-                            <p className="text-sm">{user.contact_num}</p>
+                            <p className="text-sm">
+                              {"(+" +
+                                user.contact_num.slice(0, 2) +
+                                ")" +
+                                " " +
+                                user.contact_num.slice(2, 5) +
+                                " " +
+                                user.contact_num.slice(5, 8) +
+                                " " +
+                                user.contact_num.slice(8)}
+                            </p>
                           </div>
                         );
                       })}
@@ -653,41 +709,41 @@ const Order = () => {
             )}
             {addOrderStep === 3 && (
               <>
-                <div className="flex gap-4">
-                  <div className="w-full">
-                    <div className="label">
-                      <span className="label-text">Order</span>
-                    </div>
-                    <select
-                      defaultValue={"item"}
-                      className="select select-bordered w-full"
-                      onChange={(e) => {
-                        setSelectedItem(e.currentTarget.value);
-                        const item = items?.find((item) => {
-                          return item.name === e.currentTarget.value;
-                        });
-
-                        setItemPrice(item ? item.price.toString() : "");
-                        setItemUid(item ? item.item_uid : "");
-                      }}
-                    >
-                      <option disabled value={"item"}>
-                        Item
-                      </option>
-                      {items
-                        ?.filter((item) => {
-                          if (!item.deleted) {
-                            return true;
-                          }
-                          return false;
-                        })
-                        .map((item) => (
-                          <option key={item.item_uid} value={item.name}>
-                            {item.name}
-                          </option>
-                        ))}
-                    </select>
+                <div>
+                  <div className="label">
+                    <span className="label-text">Order</span>
                   </div>
+                  <select
+                    defaultValue={"item"}
+                    className="select select-bordered w-full"
+                    onChange={(e) => {
+                      setSelectedItem(e.currentTarget.value);
+                      const item = items?.find((item) => {
+                        return item.name === e.currentTarget.value;
+                      });
+
+                      setItemPrice(item ? item.price.toString() : "");
+                      setItemUid(item ? item.item_uid : "");
+                    }}
+                  >
+                    <option disabled value={"item"}>
+                      Item
+                    </option>
+                    {items
+                      ?.filter((item) => {
+                        if (!item.deleted) {
+                          return true;
+                        }
+                        return false;
+                      })
+                      .map((item) => (
+                        <option key={item.item_uid} value={item.name}>
+                          {item.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="mt-2 flex gap-4">
                   <div className="w-full">
                     <div className="label">
                       <span className="label-text">Quantity</span>
@@ -695,15 +751,16 @@ const Order = () => {
                     <input
                       ref={itemQuantityInput}
                       type="text"
-                      placeholder="50"
+                      placeholder="12"
+                      value={itemQuantity}
                       className="input input-bordered input-md w-full"
                       onChange={(e) => {
-                        setItemQuantity(e.currentTarget.value);
                         if (!/^\d*$/.test(e.currentTarget.value)) {
                           itemQuantityInput.current?.classList.add(
                             "input-error",
                           );
                         } else {
+                          setItemQuantity(e.currentTarget.value);
                           itemQuantityInput.current?.classList.remove(
                             "input-error",
                           );
@@ -711,32 +768,58 @@ const Order = () => {
                       }}
                     />
                   </div>
-                </div>
-                <div className="mt-2">
-                  <button
-                    className="btn btn-sm w-full border-none bg-yellow-200"
-                    onClick={checkAddItem}
-                  >
-                    add item
-                  </button>
+                  <div className="flex items-center pt-8">x</div>
+                  <div className="w-full">
+                    <div className="label">
+                      <span className="label-text">Multiplier</span>
+                    </div>
+                    <input
+                      ref={itemMultiplierInput}
+                      type="text"
+                      value={itemMultiplier}
+                      className="input input-bordered input-md w-full"
+                      onChange={(e) => {
+                        if (!/^\d*$/.test(e.currentTarget.value)) {
+                          itemMultiplierInput.current?.classList.add(
+                            "input-error",
+                          );
+                        } else {
+                          setItemMultiplier(e.currentTarget.value);
+                          itemMultiplierInput.current?.classList.remove(
+                            "input-error",
+                          );
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      className="btn btn-sm h-12 w-full rounded-3xl border-none bg-yellow-200"
+                      onClick={checkAddItem}
+                    >
+                      <FaPlus size={25} color={"#4c4528"} />
+                    </button>
+                  </div>
                 </div>
                 {itemOrders.length > 0 && (
                   <>
-                    <div className="divider my-3"></div>
-                    <div className="mt-3 flex flex-col gap-2">
+                    {/* <div className="divider my-3"></div> */}
+                    <div className="mt-6 flex flex-col gap-2">
                       {itemOrders.map((itemOrder) => (
                         <div
                           key={itemOrder.itemName}
                           className="flex justify-between"
                         >
-                          <p className="text-sm">
-                            {itemOrder.itemName} • {itemOrder.quantity}{" "}
-                            {itemOrder.quantity > 1 ? "pcs." : "pc."}
+                          <p className="text-s m">
+                            {itemOrder.itemName} • {itemOrder.quantity} x{" "}
+                            {itemOrder.multiplier}
                           </p>
                           <div className="flex gap-4">
                             <p className="text-sm text-[#707070]">
                               {(
-                                Number(itemOrder.itemPrice) * itemOrder.quantity
+                                itemOrder.itemPrice *
+                                itemOrder.quantity *
+                                itemOrder.multiplier
                               ).toFixed(2)}
                             </p>
                             <button
@@ -757,7 +840,7 @@ const Order = () => {
                         </div>
                       ))}
                       <div className="divider my-[-0.3rem]"></div>
-                      <div className="mt-[-0.1rem] flex justify-between">
+                      <div className="mt-[-0.3rem] flex justify-between">
                         <p className="text-base font-semibold">Total</p>
                         <p className="mr-9 text-base font-semibold">
                           ₱
@@ -765,8 +848,9 @@ const Order = () => {
                             .reduce(
                               (sum, itemOrder) =>
                                 sum +
-                                Number(itemOrder.itemPrice) *
-                                  itemOrder.quantity,
+                                itemOrder.itemPrice *
+                                  itemOrder.quantity *
+                                  itemOrder.multiplier,
                               0,
                             )
                             .toFixed(2)}
