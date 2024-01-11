@@ -137,17 +137,28 @@ export const orderRouter = createTRPCRouter({
       //   dayjs
       //     .utc(input.date)
       //     .tz("Asia/Manila")
-      //     .add(1, "day")
-      //     .startOf("d")
-      //     .format("MMM DD YYYY h:mm A"),
+      //     .format("MMM DD YYYY h:mm:ss.SSS A"),
+      // );
+
+      // console.log(
+      //   "Less than " +
+      //     dayjs
+      //       .utc(input.date)
+      //       .tz("Asia/Manila")
+      //       .endOf("d")
+      //       .format("MMM DD YYYY h:mm:ss.SSS A"),
       // );
       // console.log(
-      //   dayjs
-      //     .utc(input.date)
-      //     .tz("Asia/Manila")
-      //     .startOf("d")
-      //     .format("MMM DD YYYY h:mm A"),
+      //   "Greater than " +
+      //     dayjs
+      //       .utc(input.date)
+      //       .tz("Asia/Manila")
+      //       .startOf("d")
+      //       .format("MMM DD YYYY h:mm:ss.SSS A"),
       // );
+
+      // console.log(dayjs(input.date).endOf("d").toDate());
+      // console.log(dayjs(input.date).startOf("d").toDate());
 
       return ctx.db.orders.findMany({
         where: {
@@ -155,7 +166,7 @@ export const orderRouter = createTRPCRouter({
           AND: [
             {
               date: {
-                lte: dayjs(input.date).add(1, "day").startOf("d").toDate(),
+                lte: dayjs(input.date).endOf("d").toDate(),
               },
             },
             { date: { gte: dayjs(input.date).startOf("d").toDate() } },
