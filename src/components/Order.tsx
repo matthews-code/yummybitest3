@@ -62,7 +62,7 @@ const Order = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<string>();
 
   const [currDate, setCurrDate] = useState(dayjs().toDate());
-  const [addDate, setAddDate] = useState<string>();
+  const [addDate, setAddDate] = useState<string>(dayjs().toISOString());
 
   const [itemUid, setItemUid] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
@@ -140,7 +140,7 @@ const Order = () => {
   });
 
   const clearStates = () => {
-    setAddDate(undefined);
+    setAddDate(dayjs().toISOString());
     setSelectedCustomer(undefined);
     setItemOrders([]);
     setPaymentMode("Cash");
@@ -221,7 +221,7 @@ const Order = () => {
   };
 
   const checkErrorDate = () => {
-    if (addDate !== undefined) {
+    if (addDate !== "") {
       setAddOrderStep(addOrderStep + 1);
     } else {
       invalidDateText.current?.classList.remove("hidden");
@@ -424,10 +424,18 @@ const Order = () => {
                         </h1>
                         <p className="text-sm text-[#707070]">
                           {/* UNCOMMENT AFTER FIX {order.delivery_mode} at{" "} */}
+                          {/* {dayjs
+                            .utc(order.date)
+                            .tz("Asia/Manila")
+                            .format("MMM DD YYYY h:mm A")} */}
+                          {dayjs(order.date).toString()}
+                        </p>
+                        <p className="text-sm text-[#707070]">
+                          {/* UNCOMMENT AFTER FIX {order.delivery_mode} at{" "} */}
                           {dayjs
                             .utc(order.date)
                             .tz("Asia/Manila")
-                            .format("MMM DD YYYY h:mm A")}
+                            .format("MMM DD YYYY h:mm A Z")}
                         </p>
                       </div>
                       <div className="text-right">
@@ -566,7 +574,7 @@ const Order = () => {
                 </div>
                 <DateTimeField
                   className="w-full"
-                  value={addDate === undefined ? null : dayjs(addDate)}
+                  value={dayjs(addDate)}
                   clearable={true}
                   disablePast={true}
                   slotProps={{
@@ -591,9 +599,9 @@ const Order = () => {
                     if (value) {
                       value?.isValid()
                         ? setAddDate(value.toDate().toISOString())
-                        : null;
+                        : setAddDate("");
                     } else {
-                      setAddDate(undefined);
+                      setAddDate("");
                     }
                     invalidDateText.current?.classList.add("hidden");
                   }}
