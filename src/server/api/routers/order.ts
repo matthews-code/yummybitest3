@@ -133,33 +133,33 @@ export const orderRouter = createTRPCRouter({
   getAllOrders: userRoleProcedure
     .input(z.object({ date: z.date() }))
     .query(({ ctx, input }) => {
-      console.log(
-        dayjs
-          .utc(input.date)
-          .tz("Asia/Manila")
-          .format("MMM DD YYYY h:mm:ss.SSS A"),
-      );
+      // console.log(
+      //   dayjs
+      //     .utc(input.date)
+      //     .tz("Asia/Manila")
+      //     .format("MMM DD YYYY h:mm:ss.SSS A"),
+      // );
 
-      console.log(
-        "Greater than " +
-          dayjs
-            .utc(input.date)
-            .tz("Asia/Manila")
-            .startOf("d")
-            .format("MMM DD YYYY h:mm:ss.SSS A"),
-      );
+      // console.log(
+      //   "Greater than " +
+      //     dayjs
+      //       .utc(input.date)
+      //       .tz("Asia/Manila")
+      //       .startOf("d")
+      //       .format("MMM DD YYYY h:mm:ss.SSS A"),
+      // );
 
-      console.log(
-        "Less than " +
-          dayjs
-            .utc(input.date)
-            .tz("Asia/Manila")
-            .endOf("d")
-            .format("MMM DD YYYY h:mm:ss.SSS A"),
-      );
+      // console.log(
+      //   "Less than " +
+      //     dayjs
+      //       .utc(input.date)
+      //       .tz("Asia/Manila")
+      //       .endOf("d")
+      //       .format("MMM DD YYYY h:mm:ss.SSS A"),
+      // );
 
-      console.log(dayjs(input.date).startOf("d").toDate());
-      console.log(dayjs(input.date).endOf("d").toDate());
+      // console.log(dayjs(input.date).startOf("d").toDate());
+      // console.log(dayjs(input.date).endOf("d").toDate());
 
       return ctx.db.orders.findMany({
         where: {
