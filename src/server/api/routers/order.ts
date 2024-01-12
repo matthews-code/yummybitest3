@@ -168,16 +168,22 @@ export const orderRouter = createTRPCRouter({
       // console.log("greater than");
       // console.log(dayjs(input.date).startOf("d").toDate());
 
+      // console.log("less than");
+      // console.log(dayjs(input.date).add(1, "d").startOf("d").toISOString());
+
+      // console.log("greater than equal to");
+      // console.log(dayjs(input.date).startOf("d").toISOString());
+
       return ctx.db.orders.findMany({
         where: {
           deleted: false,
           AND: [
             {
               date: {
-                lt: dayjs.utc(input.date).add(1, "d").startOf("d").toDate(),
+                lt: dayjs(input.date).add(1, "d").startOf("d").toISOString(),
               },
             },
-            { date: { gte: dayjs.utc(input.date).startOf("d").toDate() } },
+            { date: { gte: dayjs(input.date).startOf("d").toISOString() } },
           ],
         },
         include: { item_order: true },
