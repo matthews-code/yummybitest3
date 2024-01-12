@@ -1,6 +1,8 @@
 import { Delivery_mode, Payment_mode } from "@prisma/client";
 import dayjs from "dayjs";
 import { z } from "zod";
+import utc from "dayjs/plugin/utc";
+import tz from "dayjs/plugin/timezone";
 
 import {
   createTRPCRouter,
@@ -9,6 +11,8 @@ import {
   superAdminRoleProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+
+dayjs.extend(utc);
 
 export const orderRouter = createTRPCRouter({
   createOrder: adminRoleProcedure
