@@ -157,7 +157,7 @@ export const orderRouter = createTRPCRouter({
       // console.log("Greater than\t" + dayjs(input.date).startOf("d").toString());
       // console.log("Less than\t" + dayjs(input.date).endOf("d").toString());
 
-      console.log("\n");
+      // console.log("\n");
 
       return ctx.db.orders.findMany({
         where: {
