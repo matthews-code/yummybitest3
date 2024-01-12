@@ -61,7 +61,7 @@ const Order = () => {
   const [customerSearch, setCustomerSearch] = useState<string>("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>();
 
-  const [currDate, setCurrDate] = useState(dayjs().toDate());
+  const [currDate, setCurrDate] = useState(dayjs().toISOString());
   const [addDate, setAddDate] = useState<string>(dayjs().toISOString());
 
   const [itemUid, setItemUid] = useState<string>("");
@@ -115,7 +115,7 @@ const Order = () => {
       const previousOrders = utils.order.getAllOrders.getData();
 
       utils.order.getAllOrders.setData(
-        { date: dayjs(currDate).toDate() },
+        { date: dayjs(currDate).toISOString() },
         (old) =>
           old?.map((order) =>
             order.order_uid === updatedOrder.order_uid
@@ -129,7 +129,7 @@ const Order = () => {
 
     onError: (err, updatedOrder, context) => {
       utils.order.getAllOrders.setData(
-        { date: dayjs(currDate).toDate() },
+        { date: dayjs(currDate).toISOString() },
         context?.previousOrders,
       );
     },
@@ -385,7 +385,7 @@ const Order = () => {
           // disableOpenPicker={true}
           value={dayjs(currDate)}
           onAccept={(value: Dayjs | null) => {
-            const date = value!.toDate();
+            const date = value!.startOf("d").toISOString();
             console.log(date);
             setCurrDate(date);
           }}

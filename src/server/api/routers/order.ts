@@ -135,7 +135,7 @@ export const orderRouter = createTRPCRouter({
     }),
 
   getAllOrders: userRoleProcedure
-    .input(z.object({ date: z.date() }))
+    .input(z.object({ date: z.string().datetime() }))
     .query(({ ctx, input }) => {
       // console.log("\n");
       // console.log(dayjs(input.date).format("ddd, DD MMM YYYY H:mm:ss"));
@@ -174,16 +174,21 @@ export const orderRouter = createTRPCRouter({
       // console.log("greater than equal to");
       // console.log(dayjs(input.date).startOf("d").toISOString());
 
+      // console.log(input.date);
+      // console.log(dayjs.utc(input.date).startOf("d"));
+
       return ctx.db.orders.findMany({
         where: {
           deleted: false,
           AND: [
             {
               date: {
-                lt: dayjs(input.date).add(1, "d").startOf("d").toISOString(),
+                lt: dayjs.utc(input.date).add(1, "d").toISOString(),
+                // lt: dayjs.utc(input.date),
               },
             },
-            { date: { gte: dayjs(input.date).startOf("d").toISOString() } },
+            // { date: { gte: dayjs.utc(input.date).startOf("d").toISOString() } },
+            { date: { gte: input.date } },
           ],
         },
         include: { item_order: true },
