@@ -170,10 +170,10 @@ export const orderRouter = createTRPCRouter({
           AND: [
             {
               date: {
-                lt: dayjs(input.date).add(1, "d").startOf("d").toDate(),
+                lt: dayjs.utc(input.date).add(1, "d").startOf("d").toDate(),
               },
             },
-            { date: { gte: dayjs(input.date).startOf("d").toDate() } },
+            { date: { gte: dayjs.utc(input.date).startOf("d").toDate() } },
           ],
         },
         include: { item_order: true },
