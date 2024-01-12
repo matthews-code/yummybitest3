@@ -385,7 +385,9 @@ const Order = () => {
           // disableOpenPicker={true}
           value={dayjs(currDate)}
           onAccept={(value: Dayjs | null) => {
-            setCurrDate(value!.toDate());
+            const date = value!.toDate();
+            console.log(date);
+            setCurrDate(date);
           }}
         />
         {orders ? (
