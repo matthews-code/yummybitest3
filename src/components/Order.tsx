@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { api } from "~/utils/api";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { DateTimeField } from "@mui/x-date-pickers/DateTimeField";
@@ -61,7 +61,7 @@ const Order = () => {
   const [customerSearch, setCustomerSearch] = useState<string>("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>();
 
-  const [currDate, setCurrDate] = useState(dayjs().toISOString());
+  const [currDate, setCurrDate] = useState(dayjs().startOf("d").toISOString());
   const [addDate, setAddDate] = useState<string>(dayjs().toISOString());
 
   const [itemUid, setItemUid] = useState<string>("");
@@ -74,6 +74,10 @@ const Order = () => {
   const [deliveryMode, setDeliveryMode] = useState<string>(
     Delivery_mode.Pickup,
   );
+
+  useEffect(() => {
+    console.log("useEffect: " + dayjs(currDate).isUTC());
+  }, [currDate]);
 
   const [addNotes, setAddNotes] = useState<string>("");
 
@@ -386,7 +390,7 @@ const Order = () => {
           value={dayjs(currDate)}
           onAccept={(value: Dayjs | null) => {
             const date = value!.startOf("d").toISOString();
-            console.log(date);
+            console.log("onAccept: " + date);
             setCurrDate(date);
           }}
         />
