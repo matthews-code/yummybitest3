@@ -52,6 +52,13 @@ const Order = () => {
   const itemQuantityInput = useRef<HTMLInputElement>(null);
   const itemMultiplierInput = useRef<HTMLInputElement>(null);
 
+  const duplicateNumberText = useRef<HTMLParagraphElement>(null);
+
+  const userFirstNameInput = useRef<HTMLInputElement>(null);
+  const userLastNameInput = useRef<HTMLInputElement>(null);
+  const userContactNumInput = useRef<HTMLInputElement>(null);
+  const userAddressInput = useRef<HTMLInputElement>(null);
+
   const [orderUid, setOrderUid] = useState("");
   const [isAddingOrder, setIsAddingOrder] = useState(true);
 
@@ -75,9 +82,11 @@ const Order = () => {
     Delivery_mode.Pickup,
   );
 
-  useEffect(() => {
-    console.log("useEffect: " + dayjs(currDate).isUTC());
-  }, [currDate]);
+  const [userUid, setUserUid] = useState<string>("");
+  const [userFirstName, setUserFirstName] = useState<string>("");
+  const [userLastName, setUserLastName] = useState<string>("");
+  const [userContactNum, setUserContactNum] = useState<string>("");
+  const [userAddress, setUserAddress] = useState<string>("");
 
   const [addNotes, setAddNotes] = useState<string>("");
 
@@ -85,8 +94,6 @@ const Order = () => {
 
   const { data: orders, refetch: refetchOrders } =
     api.order.getAllOrders.useQuery({ date: currDate });
-
-  // const orders = utils.order.getAllOrders.getData();
 
   const { data: users, refetch: refetchUsers } =
     api.user.getAllUsers.useQuery();
@@ -143,6 +150,12 @@ const Order = () => {
     },
   });
 
+  const addUserEndpoint = api.user.createUser.useMutation({
+    onSuccess: () => {
+      void refetchUsers();
+    },
+  });
+
   const clearStates = () => {
     setAddDate(dayjs().toISOString());
     setSelectedCustomer(undefined);
@@ -157,6 +170,14 @@ const Order = () => {
     setOrderUid("");
   };
 
+  const clearAddUserStates = () => {
+    setUserFirstName("");
+    setUserLastName("");
+    setUserContactNum("");
+    setUserAddress("");
+    setUserUid("");
+  };
+
   const setStates = (order: order) => {
     const user = users?.find((user) => {
       return user.user_uid === order.user_uid;
@@ -168,7 +189,7 @@ const Order = () => {
     if (user) {
       setCustomerUid(user.user_uid);
       setSelectedCustomer(user.contact_num);
-      setCustomerSearch(`${user.first_name} ${user.last_name}`);
+      // setCustomerSearch(`${user.first_name} ${user.last_name}`);
     }
 
     const itemOrders = order.item_order.map((itemorder) => {
@@ -216,12 +237,62 @@ const Order = () => {
     }
 
     if (addOrderStep === 10) {
-      checkAddUser();
+      addUser(userContactNum);
     }
   };
 
-  const checkAddUser = () => {
-    setAddOrderStep(3);
+  const formatContact = (contactNum: string) => {
+    if (contactNum.length === 11 && contactNum.startsWith("0")) {
+      return "63" + contactNum.slice(1);
+    }
+    return contactNum;
+  };
+
+  const checkErrors = (contactNum: string) => {
+    if (userFirstName === "") {
+      userFirstNameInput.current?.classList.add("input-error");
+      return false;
+    }
+
+    if (contactNum === "") {
+      userContactNumInput.current?.classList.add("input-error");
+      return false;
+    }
+
+    if (
+      users?.some(
+        (user) =>
+          user.contact_num === contactNum &&
+          user.user_uid !== userUid &&
+          user.deleted === false,
+      )
+    ) {
+      duplicateNumberText.current?.classList.remove("hidden");
+      return false;
+    }
+
+    if (contactNum.length !== 12) {
+      userContactNumInput.current?.classList.add("input-error");
+      return false;
+    }
+
+    return true;
+  };
+
+  const addUser = (contactNumber: string) => {
+    const formattedContactNumber = formatContact(contactNumber);
+
+    if (checkErrors(formattedContactNumber)) {
+      addUserEndpoint.mutate({
+        firstName: userFirstName,
+        lastName: userLastName,
+        contactNum: formattedContactNumber,
+        address: userAddress,
+      });
+
+      clearAddUserStates();
+      setAddOrderStep(2);
+    }
   };
 
   const checkErrorDate = () => {
@@ -367,6 +438,16 @@ const Order = () => {
     });
   };
 
+  const cleanContact = (number: string) => {
+    const newNumber = number
+      .replace(" ", "")
+      .replace("+", "")
+      .replace("(", "")
+      .replace(")", "");
+
+    return newNumber;
+  };
+
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full max-w-3xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
@@ -390,7 +471,6 @@ const Order = () => {
           value={dayjs(currDate)}
           onAccept={(value: Dayjs | null) => {
             const date = value!.startOf("d").toISOString();
-            console.log("onAccept: " + date);
             setCurrDate(date);
           }}
         />
@@ -429,19 +509,11 @@ const Order = () => {
                           }
                         </h1>
                         <p className="text-sm text-[#707070]">
-                          {/* UNCOMMENT AFTER FIX {order.delivery_mode} at{" "} */}
-                          {"PHT\t" +
-                            dayjs
-                              .utc(order.date)
-                              .tz("Asia/Manila")
-                              .format("MMM DD YYYY h:mm A Z")}
-                        </p>
-                        <p className="text-sm text-[#707070]">
-                          {/* UNCOMMENT AFTER FIX {order.delivery_mode} at{" "} */}
-                          {"GMT\t" +
-                            dayjs
-                              .utc(order.date)
-                              .format("MMM DD YYYY h:mm A Z")}
+                          {order.delivery_mode} at{" "}
+                          {dayjs
+                            .utc(order.date)
+                            .tz("Asia/Manila")
+                            .format("h:mm A")}
                         </p>
                       </div>
                       <div className="text-right">
@@ -565,7 +637,8 @@ const Order = () => {
         >
           <div className="modal-box p-5">
             <h1 className="text-lg font-bold">
-              {isAddingOrder ? "Add Order" : "Edit Order"}
+              {isAddingOrder ? "Add Order" : "Edit Order"}{" "}
+              {addOrderStep === 10 ? "| Add User" : ""}
             </h1>
             <div className="divider m-0 p-0"></div>
             {addOrderStep === 1 && (
@@ -925,7 +998,98 @@ const Order = () => {
             )}
             {addOrderStep === 10 && (
               <>
-                <p>add user</p>
+                <div className="flex gap-4">
+                  <div className="w-full">
+                    <div className="label">
+                      <span className="label-text">First name</span>
+                    </div>
+                    <input
+                      id="user-first-name-input"
+                      ref={userFirstNameInput}
+                      type="text"
+                      placeholder="Jose"
+                      value={userFirstName}
+                      className="input input-bordered input-md w-full"
+                      onChange={(e) => {
+                        setUserFirstName(e.currentTarget.value);
+                        userFirstNameInput.current?.classList.remove(
+                          "input-error",
+                        );
+                      }}
+                    />
+                  </div>
+                  <div className="w-full">
+                    <div className="label">
+                      <span className="label-text">
+                        Last name - <i className="text-sm">Optional</i>
+                      </span>
+                    </div>
+                    <input
+                      id="user-last-name-input"
+                      ref={userLastNameInput}
+                      type="text"
+                      placeholder="Dela Cruz"
+                      value={userLastName}
+                      className="input input-bordered input-md w-full"
+                      onChange={(e) => setUserLastName(e.currentTarget.value)}
+                    />
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <div className="label">
+                    <span className="label-text">
+                      Contact Number{" "}
+                      <i
+                        ref={duplicateNumberText}
+                        className="hidden text-red-600"
+                      >
+                        (number is already taken)
+                      </i>
+                    </span>
+                  </div>
+                  <input
+                    id="user-contact-number-input"
+                    ref={userContactNumInput}
+                    type="text"
+                    placeholder="09123456789"
+                    value={userContactNum}
+                    className="input input-bordered input-md w-full"
+                    onChange={(e) => {
+                      if (!/^[+()0-9- ]*$/.test(e.currentTarget.value)) {
+                        userContactNumInput.current?.classList.add(
+                          "input-error",
+                        );
+                        return;
+                      }
+
+                      const formattedContact = cleanContact(
+                        e.currentTarget.value,
+                      );
+
+                      setUserContactNum(formattedContact);
+                      userContactNumInput.current?.classList.remove(
+                        "input-error",
+                      );
+                      duplicateNumberText.current?.classList.add("hidden");
+                    }}
+                  />
+                </div>
+                <div className="mt-2">
+                  <div className="label">
+                    <span className="label-text">
+                      Address - <i className="text-sm">Optional</i>
+                    </span>
+                  </div>
+                  <input
+                    id="user-address-input"
+                    ref={userAddressInput}
+                    type="text"
+                    placeholder="864 Acacia St., Ayala Alabang Village, Muntinlupa City"
+                    value={userAddress}
+                    className="input input-bordered input-md w-full"
+                    onChange={(e) => setUserAddress(e.currentTarget.value)}
+                  />
+                </div>
               </>
             )}
             <div className="modal-action">
@@ -961,6 +1125,7 @@ const Order = () => {
                       className="btn border-none"
                       onClick={() => {
                         if (addOrderStep === 10) {
+                          clearAddUserStates();
                           setAddOrderStep(2);
                         } else {
                           setAddOrderStep(addOrderStep - 1);
