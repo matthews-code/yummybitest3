@@ -10,7 +10,7 @@ import {
 } from "~/server/api/trpc";
 
 export const userRouter = createTRPCRouter({
-  createUser: adminRoleProcedure
+  createUser: userRoleProcedure
     .input(
       z.object({
         firstName: z.string(),

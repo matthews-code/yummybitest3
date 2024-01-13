@@ -578,48 +578,50 @@ const Order = () => {
                         <p className="text-sm text-[#707070]">{order.note}</p>
                       </>
                     )}
-                    <div className="mt-5 flex justify-between">
-                      <div className="flex gap-2">
-                        <p className="self-center text-xs italic">
-                          Mark as {order.paid ? "unpaid" : "paid"}
-                        </p>
-                        <input
-                          type="checkbox"
-                          className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
-                          onClick={() =>
-                            handleCheckboxClick(order.order_uid, order.paid)
-                          }
-                          defaultChecked={order.paid}
-                          // checked={order.paid}
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            setStates(order);
-                            setIsAddingOrder(false);
+                    {role === Role.ADMIN && (
+                      <div className="mt-5 flex justify-between">
+                        <div className="flex gap-2">
+                          <p className="self-center text-xs italic">
+                            Mark as {order.paid ? "unpaid" : "paid"}
+                          </p>
+                          <input
+                            type="checkbox"
+                            className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
+                            onClick={() =>
+                              handleCheckboxClick(order.order_uid, order.paid)
+                            }
+                            defaultChecked={order.paid}
+                            // checked={order.paid}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setStates(order);
+                              setIsAddingOrder(false);
 
-                            const modalElement = (document.getElementById(
-                              "add_order_modal",
-                            ) as HTMLDialogElement)!;
-                            modalElement.showModal();
-                          }}
-                        >
-                          <MdEdit color={"#6f7687"} size={"1.2rem"} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setOrderUid(order.order_uid);
-                            const modalElement = (document.getElementById(
-                              "delete_order_modal",
-                            ) as HTMLDialogElement)!;
-                            modalElement.showModal();
-                          }}
-                        >
-                          <MdDelete color={"#6f7687"} size={"1.2rem"} />
-                        </button>
+                              const modalElement = (document.getElementById(
+                                "add_order_modal",
+                              ) as HTMLDialogElement)!;
+                              modalElement.showModal();
+                            }}
+                          >
+                            <MdEdit color={"#6f7687"} size={"1.2rem"} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setOrderUid(order.order_uid);
+                              const modalElement = (document.getElementById(
+                                "delete_order_modal",
+                              ) as HTMLDialogElement)!;
+                              modalElement.showModal();
+                            }}
+                          >
+                            <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1176,20 +1178,18 @@ const Order = () => {
           </div>
         </dialog>
 
-        {role === Role.ADMIN && (
-          <button
-            className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
-            onClick={() => {
-              setIsAddingOrder(true);
-              const modalElement = (document.getElementById(
-                "add_order_modal",
-              ) as HTMLDialogElement)!;
-              modalElement.showModal();
-            }}
-          >
-            <FaPlus size={32} color={"#4c4528"} />
-          </button>
-        )}
+        <button
+          className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
+          onClick={() => {
+            setIsAddingOrder(true);
+            const modalElement = (document.getElementById(
+              "add_order_modal",
+            ) as HTMLDialogElement)!;
+            modalElement.showModal();
+          }}
+        >
+          <FaPlus size={32} color={"#4c4528"} />
+        </button>
       </div>
     </div>
   );

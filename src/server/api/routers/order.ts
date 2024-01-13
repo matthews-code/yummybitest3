@@ -15,7 +15,7 @@ import {
 dayjs.extend(utc);
 
 export const orderRouter = createTRPCRouter({
-  createOrder: adminRoleProcedure
+  createOrder: userRoleProcedure
     .input(
       z.object({
         date: z.string(),

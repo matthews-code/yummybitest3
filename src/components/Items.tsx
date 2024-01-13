@@ -168,7 +168,7 @@ const Items = () => {
                       <th>Name</th>
                       <th>Price</th>
                       <th>Inv.</th>
-                      <th></th>
+                      {role === Role.ADMIN && <th></th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -188,35 +188,39 @@ const Items = () => {
                               (Number(item.serving) > 1 ? "pcs." : "pc.")}
                           </td>
                           <td>{item.inventory?.toString()}</td>
-                          <td className="">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => {
-                                  setStates(item);
-                                  setIsAddingItem(false);
+                          {role === Role.ADMIN && (
+                            <td className="">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setStates(item);
+                                    setIsAddingItem(false);
 
-                                  const modalElement = (document.getElementById(
-                                    "add_item_modal",
-                                  ) as HTMLDialogElement)!;
-                                  modalElement.showModal();
-                                }}
-                              >
-                                <MdEdit color={"#6f7687"} size={"1.2rem"} />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setItemName(item.name);
-                                  setItemUid(item.item_uid);
-                                  const modalElement = (document.getElementById(
-                                    "delete_item_modal",
-                                  ) as HTMLDialogElement)!;
-                                  modalElement.showModal();
-                                }}
-                              >
-                                <MdDelete color={"#6f7687"} size={"1.2rem"} />
-                              </button>
-                            </div>
-                          </td>
+                                    const modalElement =
+                                      (document.getElementById(
+                                        "add_item_modal",
+                                      ) as HTMLDialogElement)!;
+                                    modalElement.showModal();
+                                  }}
+                                >
+                                  <MdEdit color={"#6f7687"} size={"1.2rem"} />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setItemName(item.name);
+                                    setItemUid(item.item_uid);
+                                    const modalElement =
+                                      (document.getElementById(
+                                        "delete_item_modal",
+                                      ) as HTMLDialogElement)!;
+                                    modalElement.showModal();
+                                  }}
+                                >
+                                  <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       ))}
                   </tbody>

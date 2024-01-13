@@ -245,33 +245,35 @@ const Users = () => {
                       <button className="btn btn-primary btn-sm">
                         Order History
                       </button>
-                      <div className="flex gap-2 self-center">
-                        <button
-                          onClick={() => {
-                            setStates(user);
-                            setIsAddingUser(false);
+                      {role === Role.ADMIN && (
+                        <div className="flex gap-2 self-center">
+                          <button
+                            onClick={() => {
+                              setStates(user);
+                              setIsAddingUser(false);
 
-                            const modalElement = (document.getElementById(
-                              "add_user_modal",
-                            ) as HTMLDialogElement)!;
-                            modalElement.showModal();
-                          }}
-                        >
-                          <MdEdit color={"#6f7687"} size={"1.2rem"} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setUserFirstName(user.first_name);
-                            setUserUid(user.user_uid);
-                            const modalElement = (document.getElementById(
-                              "delete_user_modal",
-                            ) as HTMLDialogElement)!;
-                            modalElement.showModal();
-                          }}
-                        >
-                          <MdDelete color={"#6f7687"} size={"1.2rem"} />
-                        </button>
-                      </div>
+                              const modalElement = (document.getElementById(
+                                "add_user_modal",
+                              ) as HTMLDialogElement)!;
+                              modalElement.showModal();
+                            }}
+                          >
+                            <MdEdit color={"#6f7687"} size={"1.2rem"} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setUserFirstName(user.first_name);
+                              setUserUid(user.user_uid);
+                              const modalElement = (document.getElementById(
+                                "delete_user_modal",
+                              ) as HTMLDialogElement)!;
+                              modalElement.showModal();
+                            }}
+                          >
+                            <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -381,7 +383,7 @@ const Users = () => {
                     userContactNumInput.current?.classList.remove(
                       "input-error",
                     );
-                    clearStates;
+                    clearStates();
                   }}
                 >
                   cancel
@@ -430,20 +432,18 @@ const Users = () => {
           </div>
         </dialog>
 
-        {role === Role.ADMIN && (
-          <button
-            className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
-            onClick={() => {
-              setIsAddingUser(true);
-              const modalElement = (document.getElementById(
-                "add_user_modal",
-              ) as HTMLDialogElement)!;
-              modalElement.showModal();
-            }}
-          >
-            <FaPlus size={32} color={"#4c4528"} />
-          </button>
-        )}
+        <button
+          className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
+          onClick={() => {
+            setIsAddingUser(true);
+            const modalElement = (document.getElementById(
+              "add_user_modal",
+            ) as HTMLDialogElement)!;
+            modalElement.showModal();
+          }}
+        >
+          <FaPlus size={32} color={"#4c4528"} />
+        </button>
       </div>
     </div>
   );
