@@ -137,46 +137,6 @@ export const orderRouter = createTRPCRouter({
   getAllOrders: userRoleProcedure
     .input(z.object({ date: z.string().datetime() }))
     .query(({ ctx, input }) => {
-      // console.log("\n");
-      // console.log(dayjs(input.date).format("ddd, DD MMM YYYY H:mm:ss"));
-
-      // console.log("\nPHT");
-      // console.log(
-      //   "Greater than\t" +
-      //     dayjs(input.date).startOf("d").format("ddd, DD MMM YYYY H:mm:ss"),
-      // );
-
-      // console.log(
-      //   "Less than\t" +
-      //     dayjs(input.date)
-      //       .add(1, "d")
-      //       .startOf("d")
-      //       .format("ddd, DD MMM YYYY H:mm:ss"),
-      // );
-
-      // console.log("\n");
-      // console.log(dayjs.utc(input.date).format("ddd, DD MMM YYYY H:mm:ss"));
-
-      // console.log("\nGMT");
-      // console.log("Greater than\t" + dayjs(input.date).startOf("d").toString());
-      // console.log("Less than\t" + dayjs(input.date).endOf("d").toString());
-
-      // console.log("\n");
-
-      // console.log("less than");
-      // console.log(dayjs(input.date).add(1, "d").startOf("d").toDate());
-      // console.log("greater than");
-      // console.log(dayjs(input.date).startOf("d").toDate());
-
-      // console.log("less than");
-      // console.log(dayjs(input.date).add(1, "d").startOf("d").toISOString());
-
-      // console.log("greater than equal to");
-      // console.log(dayjs(input.date).startOf("d").toISOString());
-
-      // console.log(input.date);
-      // console.log(dayjs.utc(input.date).startOf("d"));
-
       return ctx.db.orders.findMany({
         where: {
           deleted: false,
@@ -201,5 +161,28 @@ export const orderRouter = createTRPCRouter({
           },
         ],
       });
+    }),
+
+  getAlluserOrders: userRoleProcedure
+    .input(z.object({ uid: z.string().nullable() }))
+    .query(({ ctx, input }) => {
+      if (input.uid) {
+        return ctx.db.orders.findMany({
+          where: {
+            user_uid: input.uid,
+          },
+          include: { item_order: true },
+          orderBy: [
+            {
+              date: "desc",
+            },
+            {
+              user_uid: "asc",
+            },
+          ],
+        });
+      }
+
+      return [];
     }),
 });

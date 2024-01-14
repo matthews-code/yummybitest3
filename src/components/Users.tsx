@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import OrderHistory from "./sub/OrderHistory";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import { Role } from "@prisma/client";
@@ -25,6 +26,7 @@ const Users = () => {
   const userAddressInput = useRef<HTMLInputElement>(null);
 
   const [isAddingUser, setIsAddingUser] = useState(true);
+  const [isViewingHistory, setIsViewingHistory] = useState(false);
 
   const [searchInput, setSearchInput] = useState<string>("");
 
@@ -182,107 +184,127 @@ const Users = () => {
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
-        <input
-          type="text"
-          className="input input-bordered input-md w-full"
-          placeholder="Search using name or contact number"
-          onChange={(e) => setSearchInput(e.currentTarget.value)}
-        />
+        {isViewingHistory && (
+          <OrderHistory
+            userUid={userUid}
+            users={users}
+            setIsViewingHistory={setIsViewingHistory}
+          />
+        )}
+        {!isViewingHistory && (
+          <>
+            <input
+              type="text"
+              className="input input-bordered input-md w-full"
+              placeholder="Search using name or contact number"
+              onChange={(e) => setSearchInput(e.currentTarget.value)}
+            />
 
-        {users ? (
-          <div className="mt-4 grid gap-3 pb-28 md:grid-cols-2 xl:grid-cols-3">
-            {users
-              ?.filter((user) => {
-                if (
-                  user.first_name
-                    .toLowerCase()
-                    .startsWith(searchInput.toLowerCase())
-                ) {
-                  return true;
-                }
-                if (
-                  user.last_name
-                    ?.toLowerCase()
-                    .startsWith(searchInput.toLowerCase())
-                ) {
-                  return true;
-                }
-                if (
-                  `${user.first_name.toLowerCase()} ${user.last_name?.toLowerCase()}`.startsWith(
-                    searchInput.toLowerCase(),
-                  )
-                ) {
-                  return true;
-                }
-                if (user.contact_num.startsWith(searchInput)) {
-                  return true;
-                }
+            {users ? (
+              <div className="mt-4 grid gap-3 pb-28 md:grid-cols-2 xl:grid-cols-3">
+                {users
+                  ?.filter((user) => {
+                    if (
+                      user.first_name
+                        .toLowerCase()
+                        .startsWith(searchInput.toLowerCase())
+                    ) {
+                      return true;
+                    }
+                    if (
+                      user.last_name
+                        ?.toLowerCase()
+                        .startsWith(searchInput.toLowerCase())
+                    ) {
+                      return true;
+                    }
+                    if (
+                      `${user.first_name.toLowerCase()} ${user.last_name?.toLowerCase()}`.startsWith(
+                        searchInput.toLowerCase(),
+                      )
+                    ) {
+                      return true;
+                    }
+                    if (user.contact_num.startsWith(searchInput)) {
+                      return true;
+                    }
 
-                return false;
-              })
-              .filter((user) => {
-                if (!user.deleted) {
-                  return true;
-                }
-                return false;
-              })
-              .map((user) => (
-                <div key={user.user_uid} className="card bg-base-100 shadow-md">
-                  <div className="card-body p-4 text-sm">
-                    <h1 className="card-title m-0 p-0 text-lg">
-                      {user.first_name} {user.last_name}
-                    </h1>
-                    <p className="mt-[-0.5rem] text-[#4c4c4c]">
-                      <a
-                        href={`tel:${user.contact_num}`}
-                        className="text-sm italic text-blue-600 underline"
-                      >
-                        {manipulateContactNumber(user.contact_num)}
-                      </a>
-                    </p>
-                    <p>{user.address}</p>
-                    <div className="card-actions mt-1 flex w-full justify-between">
-                      <button className="btn btn-primary btn-sm">
-                        Order History
-                      </button>
-                      {role === Role.ADMIN && (
-                        <div className="flex gap-2 self-center">
-                          <button
-                            onClick={() => {
-                              setStates(user);
-                              setIsAddingUser(false);
-
-                              const modalElement = (document.getElementById(
-                                "add_user_modal",
-                              ) as HTMLDialogElement)!;
-                              modalElement.showModal();
-                            }}
+                    return false;
+                  })
+                  .filter((user) => {
+                    if (!user.deleted) {
+                      return true;
+                    }
+                    return false;
+                  })
+                  .map((user) => (
+                    <div
+                      key={user.user_uid}
+                      className="card bg-base-100 shadow-md"
+                    >
+                      <div className="card-body p-4 text-sm">
+                        <h1 className="card-title m-0 p-0 text-lg">
+                          {user.first_name} {user.last_name}
+                        </h1>
+                        <p className="mt-[-0.5rem] text-[#4c4c4c]">
+                          <a
+                            href={`tel:${user.contact_num}`}
+                            className="text-sm italic text-blue-600 underline"
                           >
-                            <MdEdit color={"#6f7687"} size={"1.2rem"} />
-                          </button>
+                            {manipulateContactNumber(user.contact_num)}
+                          </a>
+                        </p>
+                        <p>{user.address}</p>
+                        <div className="card-actions mt-1 flex w-full justify-between">
                           <button
+                            className="btn btn-primary btn-sm"
                             onClick={() => {
-                              setUserFirstName(user.first_name);
                               setUserUid(user.user_uid);
-                              const modalElement = (document.getElementById(
-                                "delete_user_modal",
-                              ) as HTMLDialogElement)!;
-                              modalElement.showModal();
+                              setIsViewingHistory(true);
                             }}
                           >
-                            <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                            Order History
                           </button>
+                          {role === Role.ADMIN && (
+                            <div className="flex gap-2 self-center">
+                              <button
+                                onClick={() => {
+                                  setStates(user);
+                                  setIsAddingUser(false);
+
+                                  const modalElement = (document.getElementById(
+                                    "add_user_modal",
+                                  ) as HTMLDialogElement)!;
+                                  modalElement.showModal();
+                                }}
+                              >
+                                <MdEdit color={"#6f7687"} size={"1.2rem"} />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setUserFirstName(user.first_name);
+                                  setUserUid(user.user_uid);
+                                  const modalElement = (document.getElementById(
+                                    "delete_user_modal",
+                                  ) as HTMLDialogElement)!;
+                                  modalElement.showModal();
+                                }}
+                              >
+                                <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        ) : (
-          <div className="mt-8 text-center">
-            <span className="loading loading-ring loading-lg"></span>
-          </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="mt-8 text-center">
+                <span className="loading loading-ring loading-lg"></span>
+              </div>
+            )}
+          </>
         )}
 
         {/* ADD USER MODAL */}
