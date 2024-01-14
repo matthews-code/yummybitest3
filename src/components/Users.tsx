@@ -132,7 +132,8 @@ const Users = () => {
   };
 
   const addUser = (contactNumber: string) => {
-    const formattedContactNumber = formatContact(contactNumber);
+    const cleanedContactNumber = cleanContact(contactNumber);
+    const formattedContactNumber = formatContact(cleanedContactNumber);
 
     if (checkErrors(formattedContactNumber)) {
       addUserEndpoint.mutate({
@@ -225,7 +226,13 @@ const Users = () => {
                     ) {
                       return true;
                     }
-                    if (user.contact_num.startsWith(searchInput)) {
+                    if (user.contact_num.includes(searchInput)) {
+                      return true;
+                    }
+
+                    const numWithZero = "0" + user.contact_num.slice(2);
+
+                    if (numWithZero.includes(searchInput)) {
                       return true;
                     }
 

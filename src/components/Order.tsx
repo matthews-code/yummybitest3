@@ -750,7 +750,13 @@ const Order = () => {
                         ) {
                           return true;
                         }
-                        if (user.contact_num.startsWith(customerSearch)) {
+                        if (user.contact_num.includes(customerSearch)) {
+                          return true;
+                        }
+
+                        const numWithZero = "0" + user.contact_num.slice(2);
+
+                        if (numWithZero.includes(customerSearch)) {
                           return true;
                         }
 
