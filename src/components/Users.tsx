@@ -113,8 +113,6 @@ const Users = () => {
       return false;
     }
 
-    // console.log(contactNum);
-
     if (contactNum.length !== 12) {
       userContactNumInput.current?.classList.add("input-error");
       return false;
@@ -148,7 +146,8 @@ const Users = () => {
   };
 
   const editUser = (contactNumber: string) => {
-    const formattedContactNumber = formatContact(contactNumber);
+    const cleanedContactNumber = cleanContact(contactNumber);
+    const formattedContactNumber = formatContact(cleanedContactNumber);
 
     if (checkErrors(formattedContactNumber)) {
       editUserEndpoint.mutate({
@@ -379,9 +378,9 @@ const Users = () => {
                     return;
                   }
 
-                  const formattedContact = cleanContact(e.currentTarget.value);
+                  // const formattedContact = cleanContact(e.currentTarget.value);
 
-                  setUserContactNum(formattedContact);
+                  setUserContactNum(e.currentTarget.value);
                   userContactNumInput.current?.classList.remove("input-error");
                   duplicateNumberText.current?.classList.add("hidden");
                 }}
