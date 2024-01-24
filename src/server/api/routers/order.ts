@@ -15,7 +15,7 @@ import {
 dayjs.extend(utc);
 
 export const orderRouter = createTRPCRouter({
-  createOrder: userRoleProcedure
+  createOrder: adminRoleProcedure
     .input(
       z.object({
         date: z.string(),
@@ -53,7 +53,7 @@ export const orderRouter = createTRPCRouter({
       });
     }),
 
-  editOrder: adminRoleProcedure
+  editOrder: superAdminRoleProcedure
     .input(
       z.object({
         orderUid: z.string(),
@@ -103,7 +103,7 @@ export const orderRouter = createTRPCRouter({
       return await ctx.db.$transaction([deleteItemOrders, updateOrder]);
     }),
 
-  deleteOrder: adminRoleProcedure
+  deleteOrder: superAdminRoleProcedure
     .input(z.object({ uid: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const deleteItemOrders = ctx.db.item_order.deleteMany({
@@ -121,7 +121,7 @@ export const orderRouter = createTRPCRouter({
       return await ctx.db.$transaction([deleteItemOrders, deleteOrder]);
     }),
 
-  togglePaid: adminRoleProcedure
+  togglePaid: superAdminRoleProcedure
     .input(z.object({ order_uid: z.string(), paid: z.boolean() }))
     .mutation(({ ctx, input }) => {
       return ctx.db.orders.update({

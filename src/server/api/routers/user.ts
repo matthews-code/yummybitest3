@@ -10,7 +10,7 @@ import {
 } from "~/server/api/trpc";
 
 export const userRouter = createTRPCRouter({
-  createUser: userRoleProcedure
+  createUser: adminRoleProcedure
     .input(
       z.object({
         firstName: z.string(),
@@ -30,7 +30,7 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  editUser: adminRoleProcedure
+  editUser: superAdminRoleProcedure
     .input(
       z.object({
         uid: z.string(),
@@ -54,7 +54,7 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  deleteUser: adminRoleProcedure
+  deleteUser: superAdminRoleProcedure
     .input(z.object({ uid: z.string() }))
     .mutation(({ ctx, input }) => {
       return ctx.db.users.update({

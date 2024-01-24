@@ -186,6 +186,7 @@ const Users = () => {
       <div className="h-[calc(100vh-66px)] w-full max-w-5xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
         {isViewingHistory && (
           <OrderHistory
+            role={role}
             userUid={userUid}
             users={users}
             setIsViewingHistory={setIsViewingHistory}
@@ -193,12 +194,14 @@ const Users = () => {
         )}
         {!isViewingHistory && (
           <>
-            <input
-              type="text"
-              className="input input-bordered input-md w-full"
-              placeholder="Search using name or contact number"
-              onChange={(e) => setSearchInput(e.currentTarget.value)}
-            />
+            {role !== Role.USER && (
+              <input
+                type="text"
+                className="input input-bordered input-md w-full"
+                placeholder="Search using name or contact number"
+                onChange={(e) => setSearchInput(e.currentTarget.value)}
+              />
+            )}
 
             {users ? (
               <div className="mt-4 grid gap-3 pb-28 md:grid-cols-2 xl:grid-cols-3">
@@ -250,17 +253,19 @@ const Users = () => {
                     >
                       <div className="card-body p-4 text-sm">
                         <h1 className="card-title m-0 p-0 text-lg">
-                          {user.first_name} {user.last_name}
+                          {user.first_name}{" "}
+                          {role === Role.USER ? "*****" : user.last_name}
                         </h1>
-                        <p className="mt-[-0.5rem] text-[#4c4c4c]">
-                          <a
-                            href={`tel:${user.contact_num}`}
-                            className="text-sm italic text-blue-600 underline"
-                          >
-                            {manipulateContactNumber(user.contact_num)}
-                          </a>
+                        <p className="mt-[-0.5rem] text-sm italic text-blue-600 underline">
+                          {role === Role.USER ? (
+                            "(+63) *** *** ****"
+                          ) : (
+                            <a href={`tel:${user.contact_num}`}>
+                              {manipulateContactNumber(user.contact_num)}
+                            </a>
+                          )}
                         </p>
-                        <p>{user.address}</p>
+                        {role !== Role.USER && <p>{user.address}</p>}
                         <div className="card-actions mt-1 flex w-full justify-between">
                           <button
                             className="btn btn-primary btn-sm"
@@ -271,7 +276,7 @@ const Users = () => {
                           >
                             Order History
                           </button>
-                          {role === Role.ADMIN && (
+                          {role === Role.SUPERADMIN && (
                             <div className="flex gap-2 self-center">
                               <button
                                 onClick={() => {
@@ -460,18 +465,20 @@ const Users = () => {
           </div>
         </dialog>
 
-        <button
-          className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
-          onClick={() => {
-            setIsAddingUser(true);
-            const modalElement = (document.getElementById(
-              "add_user_modal",
-            ) as HTMLDialogElement)!;
-            modalElement.showModal();
-          }}
-        >
-          <FaPlus size={32} color={"#4c4528"} />
-        </button>
+        {role !== Role.USER && (
+          <button
+            className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
+            onClick={() => {
+              setIsAddingUser(true);
+              const modalElement = (document.getElementById(
+                "add_user_modal",
+              ) as HTMLDialogElement)!;
+              modalElement.showModal();
+            }}
+          >
+            <FaPlus size={32} color={"#4c4528"} />
+          </button>
+        )}
       </div>
     </div>
   );

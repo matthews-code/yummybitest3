@@ -502,11 +502,11 @@ const Order = () => {
                               return order.user_uid === user.user_uid;
                             })?.first_name
                           }{" "}
-                          {
-                            users?.find((user) => {
-                              return order.user_uid === user.user_uid;
-                            })?.last_name
-                          }
+                          {role === Role.USER
+                            ? "*****"
+                            : users?.find((user) => {
+                                return order.user_uid === user.user_uid;
+                              })?.last_name}
                         </h1>
                         <p className="text-sm text-[#707070]">
                           {order.delivery_mode} at{" "}
@@ -518,7 +518,9 @@ const Order = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-medium">
-                          {`₱${Number(order.amount_due).toFixed(2)}`}
+                          {role === Role.USER
+                            ? "₱***.**"
+                            : `₱${Number(order.amount_due).toFixed(2)}`}
                         </p>
                         <p className="text-sm text-[#707070]">
                           {order.payment_mode} •{" "}
@@ -529,26 +531,31 @@ const Order = () => {
                   </div>
                   <div className="collapse-content bg-white">
                     <div className="mb-[-0.5rem] mt-0">
-                      <p className="inline">
-                        <a
-                          href={`tel:${users?.find((user) => {
-                            return order.user_uid === user.user_uid;
-                          })?.contact_num}`}
-                          className="text-sm italic text-blue-600 underline"
-                        >
-                          {manipulateContactNumber(order.user_uid)}
-                        </a>
+                      <p className="inline text-sm italic text-blue-600 underline">
+                        {role === Role.USER ? (
+                          "(+63) *** *** ****"
+                        ) : (
+                          <a
+                            href={`tel:${users?.find((user) => {
+                              return order.user_uid === user.user_uid;
+                            })?.contact_num}`}
+                          >
+                            {manipulateContactNumber(order.user_uid)}
+                          </a>
+                        )}
                       </p>
                       <p className="inline text-sm text-[#707070]">
                         {" "}
                         •{" "}
-                        {users?.find((user) => {
-                          return order.user_uid === user.user_uid;
-                        })?.address
-                          ? users?.find((user) => {
-                              return order.user_uid === user.user_uid;
-                            })?.address
-                          : "No address"}
+                        {role === Role.USER
+                          ? "*****"
+                          : users?.find((user) => {
+                                return order.user_uid === user.user_uid;
+                              })?.address
+                            ? users?.find((user) => {
+                                return order.user_uid === user.user_uid;
+                              })?.address
+                            : "No address"}
                       </p>
                     </div>
                     <div className="divider mb-[-0.5rem] mt-[0.8rem]"></div>
@@ -578,7 +585,7 @@ const Order = () => {
                         <p className="text-sm text-[#707070]">{order.note}</p>
                       </>
                     )}
-                    {role === Role.ADMIN && (
+                    {role === Role.SUPERADMIN && (
                       <div className="mt-5 flex justify-between">
                         <div className="flex gap-2">
                           <p className="self-center text-xs italic">
@@ -656,8 +663,7 @@ const Order = () => {
                 <DateTimeField
                   className="w-full"
                   value={dayjs(addDate)}
-                  clearable={true}
-                  disablePast={true}
+                  clearable={false}
                   slotProps={{
                     textField: {
                       error: false,
@@ -1184,18 +1190,20 @@ const Order = () => {
           </div>
         </dialog>
 
-        <button
-          className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
-          onClick={() => {
-            setIsAddingOrder(true);
-            const modalElement = (document.getElementById(
-              "add_order_modal",
-            ) as HTMLDialogElement)!;
-            modalElement.showModal();
-          }}
-        >
-          <FaPlus size={32} color={"#4c4528"} />
-        </button>
+        {role !== Role.USER && (
+          <button
+            className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
+            onClick={() => {
+              setIsAddingOrder(true);
+              const modalElement = (document.getElementById(
+                "add_order_modal",
+              ) as HTMLDialogElement)!;
+              modalElement.showModal();
+            }}
+          >
+            <FaPlus size={32} color={"#4c4528"} />
+          </button>
+        )}
       </div>
     </div>
   );

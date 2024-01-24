@@ -168,7 +168,7 @@ const Items = () => {
                       <th>Name</th>
                       <th>Price</th>
                       <th>Inv.</th>
-                      {role === Role.ADMIN && <th></th>}
+                      {role === Role.SUPERADMIN && <th></th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -188,7 +188,7 @@ const Items = () => {
                               (Number(item.serving) > 1 ? "pcs." : "pc.")}
                           </td>
                           <td>{item.inventory?.toString()}</td>
-                          {role === Role.ADMIN && (
+                          {role === Role.SUPERADMIN && (
                             <td className="">
                               <div className="flex gap-2">
                                 <button
@@ -395,7 +395,7 @@ const Items = () => {
           </div>
         </dialog>
 
-        {role === Role.ADMIN && (
+        {role === Role.SUPERADMIN && (
           <button
             className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
             onClick={() => {

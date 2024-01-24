@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { api } from "~/utils/api";
 import { GiCardboardBox } from "react-icons/gi";
 import { IoArrowBack } from "react-icons/io5";
+import { Role } from "@prisma/client";
 
 interface User {
   user_uid: string;
@@ -14,6 +15,7 @@ interface User {
 }
 
 interface HeaderProps {
+  role: string | undefined;
   userUid: string;
   users: User[] | undefined;
   setIsViewingHistory: React.Dispatch<React.SetStateAction<boolean>>;
@@ -61,11 +63,11 @@ const OrderHistory: React.FC<HeaderProps> = (props) => {
                             return order.user_uid === user.user_uid;
                           })?.first_name
                         }{" "}
-                        {
-                          props.users?.find((user) => {
-                            return order.user_uid === user.user_uid;
-                          })?.last_name
-                        }
+                        {props.role === Role.USER
+                          ? "*****"
+                          : props.users?.find((user) => {
+                              return order.user_uid === user.user_uid;
+                            })?.last_name}
                       </h1>
                       <p className="text-sm text-[#707070]">
                         {order.delivery_mode} at{" "}
@@ -77,7 +79,9 @@ const OrderHistory: React.FC<HeaderProps> = (props) => {
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-medium">
-                        {`₱${Number(order.amount_due).toFixed(2)}`}
+                        {props.role === Role.USER
+                          ? "₱****.**"
+                          : `₱${Number(order.amount_due).toFixed(2)}`}
                       </p>
                       <p className="text-sm text-[#707070]">
                         {order.payment_mode} • {order.paid ? "Paid" : "Unpaid"}

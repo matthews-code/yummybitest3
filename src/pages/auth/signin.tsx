@@ -19,8 +19,8 @@ export default function SignIn({
         >
           <div className="flex w-72 flex-col gap-8">
             <h1 className="text-center text-3xl font-bold">Yummy Bites!</h1>
-            <div
-              className="relative z-10 inline h-fit rounded-lg border-2 border-solid border-blue-500 bg-blue-500 p-2 text-center text-xs font-semibold text-white"
+            <button
+              className="relative z-10 inline h-fit rounded-lg border-2 border-solid border-blue-500 bg-blue-500 p-2 text-xs font-semibold text-white"
               onClick={() => signIn(provider.id)}
             >
               <Image
@@ -32,7 +32,7 @@ export default function SignIn({
                 unoptimized={true}
               />
               Sign in with {provider.name}
-            </div>
+            </button>
           </div>
         </div>
       ))}
