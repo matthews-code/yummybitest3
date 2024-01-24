@@ -161,7 +161,7 @@ const Items = () => {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto pb-28">
                 <table className="table sm:table-lg">
                   <thead>
                     <tr className="text-sm">
