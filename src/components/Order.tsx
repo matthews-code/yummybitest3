@@ -168,6 +168,8 @@ const Order = () => {
     setItemUid("");
     setSelectedItem("");
     setOrderUid("");
+    setItemQuantity("");
+    setItemMultiplier("");
   };
 
   const clearAddUserStates = () => {
@@ -835,6 +837,7 @@ const Order = () => {
 
                       setItemPrice(item ? item.price.toString() : "");
                       setItemUid(item ? item.item_uid : "");
+                      itemQuantityInput.current?.focus();
                     }}
                   >
                     <option disabled value={"item"}>
