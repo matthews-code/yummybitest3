@@ -169,7 +169,7 @@ const Order = () => {
     setSelectedItem("");
     setOrderUid("");
     setItemQuantity("");
-    setItemMultiplier("");
+    setItemMultiplier("1");
   };
 
   const clearAddUserStates = () => {
@@ -831,7 +831,7 @@ const Order = () => {
                     defaultValue={"item"}
                     className="select select-bordered w-full"
                     onChange={(e) => {
-                      itemQuantityInput.current?.focus();
+                      // itemQuantityInput.current?.focus();
                       setSelectedItem(e.currentTarget.value);
                       const item = items?.find((item) => {
                         return item.name === e.currentTarget.value;
