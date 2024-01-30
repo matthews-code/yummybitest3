@@ -231,10 +231,12 @@ const Order = () => {
     }
 
     if (addOrderStep === 4 && isAddingOrder) {
+      setCurrDate(dayjs(addDate).startOf("d").toISOString());
       addOrder();
     }
 
     if (addOrderStep === 4 && !isAddingOrder) {
+      setCurrDate(dayjs(addDate).startOf("d").toISOString());
       editOrder();
     }
 
@@ -381,7 +383,6 @@ const Order = () => {
         };
       }),
     });
-    setCurrDate(dayjs(addDate).startOf("d").toISOString());
     setAddOrderStep(1);
     clearStates();
     modalBehaviour();
@@ -830,6 +831,7 @@ const Order = () => {
                     defaultValue={"item"}
                     className="select select-bordered w-full"
                     onChange={(e) => {
+                      itemQuantityInput.current?.focus();
                       setSelectedItem(e.currentTarget.value);
                       const item = items?.find((item) => {
                         return item.name === e.currentTarget.value;
@@ -837,7 +839,6 @@ const Order = () => {
 
                       setItemPrice(item ? item.price.toString() : "");
                       setItemUid(item ? item.item_uid : "");
-                      itemQuantityInput.current?.focus();
                     }}
                   >
                     <option disabled value={"item"}>
