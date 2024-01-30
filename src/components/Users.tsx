@@ -75,10 +75,10 @@ const Users = () => {
 
   const cleanContact = (number: string) => {
     const newNumber = number
-      .replace(" ", "")
-      .replace("+", "")
-      .replace("(", "")
-      .replace(")", "");
+      .replaceAll(" ", "")
+      .replaceAll("+", "")
+      .replaceAll("(", "")
+      .replaceAll(")", "");
 
     return newNumber;
   };

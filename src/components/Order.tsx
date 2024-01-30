@@ -379,6 +379,7 @@ const Order = () => {
         };
       }),
     });
+    setCurrDate(dayjs(addDate).startOf("d").toISOString());
     setAddOrderStep(1);
     clearStates();
     modalBehaviour();
@@ -453,7 +454,14 @@ const Order = () => {
       <div className="h-[calc(100vh-66px)] w-full max-w-3xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
         <MobileDatePicker
           className="self-center"
-          // closeOnSelect={true}
+          closeOnSelect={true}
+          slotProps={{
+            actionBar: {
+              sx: {
+                display: "none",
+              },
+            },
+          }}
           sx={{
             width: "100%",
             ".MuiInputBase-input": {
@@ -778,7 +786,7 @@ const Order = () => {
                         return (
                           <div
                             key={user.user_uid}
-                            className="flex justify-between px-4 py-2 hover:bg-slate-100"
+                            className="flex justify-between px-4 py-3 hover:bg-slate-100"
                             onClick={() => {
                               setCustomerUid(user.user_uid);
                               setSelectedCustomer(user.contact_num);
@@ -849,6 +857,30 @@ const Order = () => {
                 <div className="mt-2 flex gap-4">
                   <div className="w-full">
                     <div className="label">
+                      <span className="label-text">Multiplier</span>
+                    </div>
+                    <input
+                      ref={itemMultiplierInput}
+                      type="text"
+                      value={itemMultiplier}
+                      className="input input-bordered input-md w-full"
+                      onChange={(e) => {
+                        if (!/^\d*$/.test(e.currentTarget.value)) {
+                          itemMultiplierInput.current?.classList.add(
+                            "input-error",
+                          );
+                        } else {
+                          setItemMultiplier(e.currentTarget.value);
+                          itemMultiplierInput.current?.classList.remove(
+                            "input-error",
+                          );
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center pt-8">x</div>
+                  <div className="w-full">
+                    <div className="label">
                       <span className="label-text">Quantity</span>
                     </div>
                     <input
@@ -865,30 +897,6 @@ const Order = () => {
                         } else {
                           setItemQuantity(e.currentTarget.value);
                           itemQuantityInput.current?.classList.remove(
-                            "input-error",
-                          );
-                        }
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center pt-8">x</div>
-                  <div className="w-full">
-                    <div className="label">
-                      <span className="label-text">Multiplier</span>
-                    </div>
-                    <input
-                      ref={itemMultiplierInput}
-                      type="text"
-                      value={itemMultiplier}
-                      className="input input-bordered input-md w-full"
-                      onChange={(e) => {
-                        if (!/^\d*$/.test(e.currentTarget.value)) {
-                          itemMultiplierInput.current?.classList.add(
-                            "input-error",
-                          );
-                        } else {
-                          setItemMultiplier(e.currentTarget.value);
-                          itemMultiplierInput.current?.classList.remove(
                             "input-error",
                           );
                         }
@@ -1130,7 +1138,7 @@ const Order = () => {
                         setAddOrderStep(10);
                       }}
                     >
-                      add customer
+                      add new
                     </div>
                   )}
                   {addOrderStep > 1 && (
