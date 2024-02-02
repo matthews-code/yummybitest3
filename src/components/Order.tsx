@@ -10,6 +10,8 @@ import { FaPlus } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { GiCardboardBox } from "react-icons/gi";
+import { FaChevronLeft } from "react-icons/fa";
+import { FaChevronRight } from "react-icons/fa";
 import { Decimal } from "@prisma/client/runtime/library";
 
 dayjs.extend(utc);
@@ -455,36 +457,55 @@ const Order = () => {
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full max-w-3xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
-        <MobileDatePicker
-          className="self-center"
-          closeOnSelect={true}
-          slotProps={{
-            actionBar: {
-              sx: {
-                display: "none",
+        <div className="flex items-center gap-6 px-3 sm:px-0">
+          <button
+            className="btn btn-circle h-8 min-h-0 w-8 bg-[#eaecef] sm:h-12 sm:min-h-0 sm:w-12"
+            onClick={() => {
+              setCurrDate(dayjs(currDate).add(-1, "d").toISOString());
+            }}
+          >
+            <FaChevronLeft className="h-3 sm:h-5" color={"#4c4528"} />
+          </button>
+
+          <MobileDatePicker
+            className="self-center"
+            closeOnSelect={true}
+            slotProps={{
+              actionBar: {
+                sx: {
+                  display: "none",
+                },
               },
-            },
-          }}
-          sx={{
-            width: "100%",
-            ".MuiInputBase-input": {
-              letterSpacing: 0.5,
-              textAlign: "center",
-              // fontFamily: "Segoe ui",
-            },
-            ".MuiInputBase-root": {
-              borderRadius: 2,
-              height: 48,
-              background: "white",
-            },
-          }}
-          // disableOpenPicker={true}
-          value={dayjs(currDate)}
-          onAccept={(value: Dayjs | null) => {
-            const date = value!.startOf("d").toISOString();
-            setCurrDate(date);
-          }}
-        />
+            }}
+            sx={{
+              width: "100%",
+              ".MuiInputBase-input": {
+                letterSpacing: 0.5,
+                textAlign: "center",
+                // fontFamily: "Segoe ui",
+              },
+              ".MuiInputBase-root": {
+                borderRadius: 2,
+                height: 48,
+                background: "white",
+              },
+            }}
+            // disableOpenPicker={true}
+            value={dayjs(currDate)}
+            onAccept={(value: Dayjs | null) => {
+              const date = value!.startOf("d").toISOString();
+              setCurrDate(date);
+            }}
+          />
+          <button
+            className="btn btn-circle h-8 min-h-0 w-8 bg-[#eaecef] sm:h-12 sm:min-h-0 sm:w-12"
+            onClick={() => {
+              setCurrDate(dayjs(currDate).add(1, "d").toISOString());
+            }}
+          >
+            <FaChevronRight className="h-3 sm:h-5" color={"#4c4528"} />
+          </button>
+        </div>
         {orders ? (
           <>
             {orders.length < 1 && (
