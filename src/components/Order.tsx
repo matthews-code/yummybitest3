@@ -457,7 +457,7 @@ const Order = () => {
   return (
     <div className="flex justify-center">
       <div className="h-[calc(100vh-66px)] w-full max-w-3xl p-3 sm:w-4/5 sm:p-8 xl:w-3/4">
-        <div className="flex items-center gap-6 px-3 sm:px-0">
+        <div className="flex items-center gap-4 px-1 sm:px-0">
           <button
             className="btn btn-circle h-8 min-h-0 w-8 bg-[#eaecef] sm:h-12 sm:min-h-0 sm:w-12"
             onClick={() => {
