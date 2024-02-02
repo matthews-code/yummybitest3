@@ -53,7 +53,7 @@ export const orderRouter = createTRPCRouter({
       });
     }),
 
-  editOrder: superAdminRoleProcedure
+  editOrder: adminRoleProcedure
     .input(
       z.object({
         orderUid: z.string(),
@@ -130,6 +130,19 @@ export const orderRouter = createTRPCRouter({
         },
         data: {
           paid: !input.paid,
+        },
+      });
+    }),
+
+  toggleCollected: adminRoleProcedure
+    .input(z.object({ order_uid: z.string(), collected: z.boolean() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.db.orders.update({
+        where: {
+          order_uid: input.order_uid,
+        },
+        data: {
+          collected: !input.collected,
         },
       });
     }),

@@ -152,6 +152,37 @@ const Order = () => {
     },
   });
 
+  const toggleCollected = api.order.toggleCollected.useMutation({
+    async onMutate(updatedOrder) {
+      await utils.order.getAllOrders.cancel();
+
+      const previousOrders = utils.order.getAllOrders.getData();
+
+      utils.order.getAllOrders.setData(
+        { date: dayjs(currDate).toISOString() },
+        (old) =>
+          old?.map((order) =>
+            order.order_uid === updatedOrder.order_uid
+              ? { ...order, collected: updatedOrder.collected }
+              : order,
+          ),
+      );
+
+      return { previousOrders };
+    },
+
+    onError: (err, updatedOrder, context) => {
+      utils.order.getAllOrders.setData(
+        { date: dayjs(currDate).toISOString() },
+        context?.previousOrders,
+      );
+    },
+
+    onSettled: async () => {
+      await utils.order.getAllOrders.invalidate();
+    },
+  });
+
   const addUserEndpoint = api.user.createUser.useMutation({
     onSuccess: () => {
       void refetchUsers();
@@ -437,10 +468,17 @@ const Order = () => {
     );
   };
 
-  const handleCheckboxClick = (orderId: string, paid: boolean) => {
+  const handlePaidClick = (orderId: string, paid: boolean) => {
     togglePaid.mutate({
       order_uid: orderId,
       paid: paid,
+    });
+  };
+
+  const handleCollectedClick = (orderId: string, collected: boolean) => {
+    toggleCollected.mutate({
+      order_uid: orderId,
+      collected: collected,
     });
   };
 
@@ -552,10 +590,13 @@ const Order = () => {
                         <p className="text-lg font-medium">
                           {role === Role.USER
                             ? "₱***.**"
-                            : `₱${Number(order.amount_due).toFixed(2)}`}
+                            : `₱${Number(order.amount_due).toFixed(2)}`}{" "}
+                          <span className="text-sm">{order.payment_mode}</span>
                         </p>
                         <p className="text-sm text-[#707070]">
-                          {order.payment_mode} •{" "}
+                          {/* {order.payment_mode} •{" "} */}
+                          {/* {order.collected ? "Collected" : "Uncollected"} •{" "} */}
+                          {order.collected ? "Collected •" : ""}{" "}
                           {order.paid ? "Paid" : "Unpaid"}
                         </p>
                       </div>
@@ -617,21 +658,39 @@ const Order = () => {
                         <p className="text-sm text-[#707070]">{order.note}</p>
                       </>
                     )}
-                    {role === Role.SUPERADMIN && (
+                    {role !== Role.USER && (
                       <div className="mt-5 flex justify-between">
                         <div className="flex gap-2">
                           <p className="self-center text-xs italic">
-                            Mark as {order.paid ? "unpaid" : "paid"}
+                            Mark as{" "}
+                            {order.collected ? "uncollected" : "collected"}
                           </p>
                           <input
                             type="checkbox"
                             className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
                             onClick={() =>
-                              handleCheckboxClick(order.order_uid, order.paid)
+                              handleCollectedClick(
+                                order.order_uid,
+                                order.collected,
+                              )
                             }
-                            defaultChecked={order.paid}
-                            // checked={order.paid}
+                            defaultChecked={order.collected}
                           />
+                          {role === Role.SUPERADMIN && (
+                            <>
+                              <p className="self-center text-xs italic">
+                                Mark as {order.paid ? "unpaid" : "paid"}
+                              </p>
+                              <input
+                                type="checkbox"
+                                className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
+                                onClick={() =>
+                                  handlePaidClick(order.order_uid, order.paid)
+                                }
+                                defaultChecked={order.paid}
+                              />
+                            </>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <button
@@ -647,17 +706,19 @@ const Order = () => {
                           >
                             <MdEdit color={"#6f7687"} size={"1.2rem"} />
                           </button>
-                          <button
-                            onClick={() => {
-                              setOrderUid(order.order_uid);
-                              const modalElement = (document.getElementById(
-                                "delete_order_modal",
-                              ) as HTMLDialogElement)!;
-                              modalElement.showModal();
-                            }}
-                          >
-                            <MdDelete color={"#6f7687"} size={"1.2rem"} />
-                          </button>
+                          {role === Role.SUPERADMIN && (
+                            <button
+                              onClick={() => {
+                                setOrderUid(order.order_uid);
+                                const modalElement = (document.getElementById(
+                                  "delete_order_modal",
+                                ) as HTMLDialogElement)!;
+                                modalElement.showModal();
+                              }}
+                            >
+                              <MdDelete color={"#6f7687"} size={"1.2rem"} />
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}

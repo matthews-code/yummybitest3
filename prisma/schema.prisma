@@ -96,6 +96,7 @@ model orders {
   payment_mode  Payment_mode
   delivery_mode Delivery_mode
   paid          Boolean       @default(false)
+  collected          Boolean       @default(false)
   deleted       Boolean       @default(false)
   item_order    item_order[]
   users         users         @relation(fields: [user_uid], references: [user_uid], onDelete: NoAction, onUpdate: NoAction)

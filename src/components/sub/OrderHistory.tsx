@@ -70,7 +70,6 @@ const OrderHistory: React.FC<HeaderProps> = (props) => {
                             })?.last_name}
                       </h1>
                       <p className="text-sm text-[#707070]">
-                        {order.delivery_mode} at{" "}
                         {dayjs
                           .utc(order.date)
                           .tz("Asia/Manila")
@@ -81,10 +80,12 @@ const OrderHistory: React.FC<HeaderProps> = (props) => {
                       <p className="text-lg font-medium">
                         {props.role === Role.USER
                           ? "₱****.**"
-                          : `₱${Number(order.amount_due).toFixed(2)}`}
+                          : `₱${Number(order.amount_due).toFixed(2)}`}{" "}
+                        <span className="text-sm">{order.payment_mode}</span>
                       </p>
                       <p className="text-sm text-[#707070]">
-                        {order.payment_mode} • {order.paid ? "Paid" : "Unpaid"}
+                        {order.collected ? "Collected •" : ""}{" "}
+                        {order.paid ? "Paid" : "Unpaid"}
                       </p>
                     </div>
                   </div>
