@@ -271,6 +271,7 @@ const Users = () => {
                             className="btn btn-primary btn-sm"
                             onClick={() => {
                               setUserUid(user.user_uid);
+                              setSearchInput("");
                               setIsViewingHistory(true);
                             }}
                           >
