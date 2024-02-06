@@ -317,7 +317,8 @@ const Order = () => {
   };
 
   const addUser = (contactNumber: string) => {
-    const formattedContactNumber = formatContact(contactNumber);
+    const cleanedContactNumber = cleanContact(contactNumber);
+    const formattedContactNumber = formatContact(cleanedContactNumber);
 
     if (checkErrors(formattedContactNumber)) {
       addUserEndpoint.mutate({
@@ -326,7 +327,6 @@ const Order = () => {
         contactNum: formattedContactNumber,
         address: userAddress,
       });
-
       clearAddUserStates();
       setAddOrderStep(2);
     }
@@ -484,10 +484,10 @@ const Order = () => {
 
   const cleanContact = (number: string) => {
     const newNumber = number
-      .replace(" ", "")
-      .replace("+", "")
-      .replace("(", "")
-      .replace(")", "");
+      .replaceAll(" ", "")
+      .replaceAll("+", "")
+      .replaceAll("(", "")
+      .replaceAll(")", "");
 
     return newNumber;
   };
@@ -646,8 +646,8 @@ const Order = () => {
                             }
                           </p>
                           <p className="text-sm text-[#707070]">
-                            {`${Number(itemOrder.quantity)}`} x{" "}
-                            {`${Number(itemOrder.multiplier)}`}
+                            {`${Number(itemOrder.multiplier)}`} x{" "}
+                            {`${Number(itemOrder.quantity)}`}
                           </p>
                         </div>
                       ))}
@@ -1008,8 +1008,8 @@ const Order = () => {
                           className="flex justify-between"
                         >
                           <p className="text-sm">
-                            {itemOrder.itemName} • {itemOrder.quantity} x{" "}
-                            {itemOrder.multiplier}
+                            {itemOrder.itemName} • {itemOrder.multiplier} x{" "}
+                            {itemOrder.quantity}
                           </p>
                           <div className="flex gap-4">
                             <p className="text-sm text-[#707070]">
@@ -1170,11 +1170,11 @@ const Order = () => {
                         return;
                       }
 
-                      const formattedContact = cleanContact(
-                        e.currentTarget.value,
-                      );
+                      // const formattedContact = cleanContact(
+                      //   e.currentTarget.value,
+                      // );
 
-                      setUserContactNum(formattedContact);
+                      setUserContactNum(e.currentTarget.value);
                       userContactNumInput.current?.classList.remove(
                         "input-error",
                       );
