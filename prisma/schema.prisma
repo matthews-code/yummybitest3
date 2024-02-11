@@ -122,6 +122,7 @@ enum Payment_mode {
   Gcash
   Cash
   BPI
+  Gifting
 }
 
 enum Delivery_mode {

@@ -593,12 +593,17 @@ const Order = () => {
                             : `₱${Number(order.amount_due).toFixed(2)}`}{" "}
                           <span className="text-sm">{order.payment_mode}</span>
                         </p>
-                        <p className="text-sm text-[#707070]">
-                          {/* {order.payment_mode} •{" "} */}
-                          {/* {order.collected ? "Collected" : "Uncollected"} •{" "} */}
-                          {order.collected ? "Collected •" : ""}{" "}
-                          {order.paid ? "Paid" : "Unpaid"}
-                        </p>
+                        {order.payment_mode !== Payment_mode.Gifting && (
+                          <p className="text-sm text-[#707070]">
+                            {order.collected ? "Collected •" : ""}{" "}
+                            {order.paid ? "Paid" : "Unpaid"}{" "}
+                          </p>
+                        )}
+                        {order.payment_mode === Payment_mode.Gifting && (
+                          <p className="text-sm text-[#707070]">
+                            {order.collected ? "Collected" : ""}{" "}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -676,21 +681,22 @@ const Order = () => {
                             }
                             defaultChecked={order.collected}
                           />
-                          {role === Role.SUPERADMIN && (
-                            <>
-                              <p className="self-center text-xs italic">
-                                Mark as {order.paid ? "unpaid" : "paid"}
-                              </p>
-                              <input
-                                type="checkbox"
-                                className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
-                                onClick={() =>
-                                  handlePaidClick(order.order_uid, order.paid)
-                                }
-                                defaultChecked={order.paid}
-                              />
-                            </>
-                          )}
+                          {role === Role.SUPERADMIN &&
+                            order.payment_mode !== Payment_mode.Gifting && (
+                              <>
+                                <p className="self-center text-xs italic">
+                                  Mark as {order.paid ? "unpaid" : "paid"}
+                                </p>
+                                <input
+                                  type="checkbox"
+                                  className="checkbox-success checkbox checkbox-sm self-center border-black [--chkfg:white]"
+                                  onClick={() =>
+                                    handlePaidClick(order.order_uid, order.paid)
+                                  }
+                                  defaultChecked={order.paid}
+                                />
+                              </>
+                            )}
                         </div>
                         <div className="flex items-center gap-2">
                           <button
@@ -913,12 +919,12 @@ const Order = () => {
                     defaultValue={"item"}
                     className="select select-bordered w-full"
                     onChange={(e) => {
-                      // itemQuantityInput.current?.focus();
                       setSelectedItem(e.currentTarget.value);
                       const item = items?.find((item) => {
                         return item.name === e.currentTarget.value;
                       });
 
+                      setItemQuantity(item ? item.serving.toString() : "");
                       setItemPrice(item ? item.price.toString() : "");
                       setItemUid(item ? item.item_uid : "");
                     }}
@@ -972,7 +978,6 @@ const Order = () => {
                     <input
                       ref={itemQuantityInput}
                       type="text"
-                      placeholder="12"
                       value={itemQuantity}
                       className="input input-bordered input-md w-full"
                       onChange={(e) => {
@@ -1073,6 +1078,7 @@ const Order = () => {
                       <option value={Payment_mode.Cash}>Cash</option>
                       <option value={Payment_mode.Gcash}>Gcash</option>
                       <option value={Payment_mode.BPI}>BPI</option>
+                      <option value={Payment_mode.Gifting}>Gifting</option>
                     </select>
                   </div>
                   <div className="w-full">

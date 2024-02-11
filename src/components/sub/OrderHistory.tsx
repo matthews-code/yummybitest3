@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { api } from "~/utils/api";
 import { GiCardboardBox } from "react-icons/gi";
 import { IoArrowBack } from "react-icons/io5";
-import { Role } from "@prisma/client";
+import { Payment_mode, Role } from "@prisma/client";
 
 interface User {
   user_uid: string;
@@ -83,10 +83,17 @@ const OrderHistory: React.FC<HeaderProps> = (props) => {
                           : `₱${Number(order.amount_due).toFixed(2)}`}{" "}
                         <span className="text-sm">{order.payment_mode}</span>
                       </p>
-                      <p className="text-sm text-[#707070]">
-                        {order.collected ? "Collected •" : ""}{" "}
-                        {order.paid ? "Paid" : "Unpaid"}
-                      </p>
+                      {order.payment_mode !== Payment_mode.Gifting && (
+                        <p className="text-sm text-[#707070]">
+                          {order.collected ? "Collected •" : ""}{" "}
+                          {order.paid ? "Paid" : "Unpaid"}{" "}
+                        </p>
+                      )}
+                      {order.payment_mode === Payment_mode.Gifting && (
+                        <p className="text-sm text-[#707070]">
+                          {order.collected ? "Collected" : ""}{" "}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
