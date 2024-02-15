@@ -1292,7 +1292,7 @@ const Order = () => {
 
         {role !== Role.USER && (
           <button
-            className="btn btn-circle btn-primary fixed bottom-6 right-6 h-16 w-16 shadow-lg"
+            className="btn btn-circle btn-primary fixed bottom-6 right-6 z-10 h-16 w-16 shadow-lg"
             onClick={() => {
               setIsAddingOrder(true);
               const modalElement = (document.getElementById(
