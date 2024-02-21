@@ -760,7 +760,7 @@ const Order = () => {
                     </i>
                   </span>
                 </div> */}
-                <p className="my-1 w-full text-center text-lg font-medium">
+                <p className="my-1 w-full text-center text-base" tabIndex={1}>
                   {dayjs(addDate)
                     .tz("Asia/Manila")
                     .format("MMMM DD, YYYY h:mm A")}
@@ -776,6 +776,7 @@ const Order = () => {
                 /> */}
                 <StaticDateTimePicker
                   className="w-full"
+                  autoFocus={false}
                   value={dayjs(addDate)}
                   timezone="Asia/Manila"
                   showDaysOutsideCurrentMonth={true}
