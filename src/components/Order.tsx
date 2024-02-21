@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { api } from "~/utils/api";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { DateTimeField } from "@mui/x-date-pickers/DateTimeField";
+import { StaticDateTimePicker } from "@mui/x-date-pickers/StaticDateTimePicker";
 import dayjs, { Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc";
 import tz from "dayjs/plugin/timezone";
@@ -759,10 +760,52 @@ const Order = () => {
                     </i>
                   </span>
                 </div>
-                <DateTimeField
+                <input
+                  type="text"
+                  value={dayjs(addDate)
+                    .tz("Asia/Manila")
+                    .format("MMMM DD, YYYY h:mm A")}
+                  placeholder="You can't touch this"
+                  className="input input-bordered mb-2 w-full"
+                  readOnly
+                />
+                <StaticDateTimePicker
                   className="w-full"
                   value={dayjs(addDate)}
+                  timezone="Asia/Manila"
+                  showDaysOutsideCurrentMonth={true}
+                  minutesStep={5}
+                  ampmInClock={true}
+                  slotProps={{
+                    actionBar: {
+                      sx: {
+                        display: "none",
+                      },
+                    },
+                    toolbar: {
+                      sx: {
+                        display: "none",
+                      },
+                    },
+                  }}
+                  onChange={(value: Dayjs | null) => {
+                    if (value) {
+                      value?.isValid()
+                        ? setAddDate(value.toDate().toISOString())
+                        : setAddDate("");
+                    } else {
+                      setAddDate("");
+                    }
+                    invalidDateText.current?.classList.add("hidden");
+                  }}
+                />
+
+                {/* <DateTimeField
+                  className="w-full"
+                  value={dayjs(addDate)}
+                  formatDensity="spacious"
                   clearable={false}
+                  timezone="Asia/Manila"
                   slotProps={{
                     textField: {
                       error: false,
@@ -791,7 +834,7 @@ const Order = () => {
                     }
                     invalidDateText.current?.classList.add("hidden");
                   }}
-                />
+                /> */}
               </>
             )}
             {addOrderStep === 2 && (
