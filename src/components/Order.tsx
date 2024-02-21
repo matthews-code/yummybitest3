@@ -760,7 +760,7 @@ const Order = () => {
                     </i>
                   </span>
                 </div> */}
-                <p className="my-1 w-full text-center text-base" tabIndex={1}>
+                <p className="my-1 w-full text-center text-base">
                   {dayjs(addDate)
                     .tz("Asia/Manila")
                     .format("MMMM DD, YYYY h:mm A")}
