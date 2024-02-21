@@ -752,23 +752,28 @@ const Order = () => {
             <div className="divider m-0 p-0"></div>
             {addOrderStep === 1 && (
               <>
-                <div className="label">
+                {/* <div className="label">
                   <span className="label-text">
                     Date{" "}
                     <i ref={invalidDateText} className="hidden text-red-600">
                       (invalid date)
                     </i>
                   </span>
-                </div>
-                <input
+                </div> */}
+                <p className="my-1 w-full text-center text-lg font-medium">
+                  {dayjs(addDate)
+                    .tz("Asia/Manila")
+                    .format("MMMM DD, YYYY h:mm A")}
+                </p>
+                {/* <input
                   type="text"
                   value={dayjs(addDate)
                     .tz("Asia/Manila")
                     .format("MMMM DD, YYYY h:mm A")}
                   placeholder="You can't touch this"
-                  className="input input-bordered mb-2 w-full"
+                  className="input input-bordered mb-1 w-full"
                   readOnly
-                />
+                /> */}
                 <StaticDateTimePicker
                   className="w-full"
                   value={dayjs(addDate)}
