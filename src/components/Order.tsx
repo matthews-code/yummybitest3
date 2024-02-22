@@ -3,6 +3,7 @@ import { api } from "~/utils/api";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { DateTimeField } from "@mui/x-date-pickers/DateTimeField";
 import { StaticDateTimePicker } from "@mui/x-date-pickers/StaticDateTimePicker";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs, { Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc";
 import tz from "dayjs/plugin/timezone";
@@ -760,23 +761,36 @@ const Order = () => {
                     </i>
                   </span>
                 </div> */}
-                <p className="my-1 w-full text-center text-base">
+                {/* <p className="my-1 w-full text-center text-base" tabIndex={1}>
                   {dayjs(addDate)
                     .tz("Asia/Manila")
                     .format("MMMM DD, YYYY h:mm A")}
-                </p>
-                {/* <input
+                </p> */}
+                <input
                   type="text"
                   value={dayjs(addDate)
                     .tz("Asia/Manila")
                     .format("MMMM DD, YYYY h:mm A")}
                   placeholder="You can't touch this"
-                  className="input input-bordered mb-1 w-full"
+                  className="input input-bordered mb-1 w-full text-center"
                   readOnly
+                />
+                {/* <DateTimePicker
+                  label="Controlled picker"
+                  value={dayjs(addDate)}
+                  onChange={(value: Dayjs | null) => {
+                    if (value) {
+                      value?.isValid()
+                        ? setAddDate(value.toDate().toISOString())
+                        : setAddDate("");
+                    } else {
+                      setAddDate("");
+                    }
+                    invalidDateText.current?.classList.add("hidden");
+                  }}
                 /> */}
                 <StaticDateTimePicker
                   className="w-full"
-                  autoFocus={false}
                   value={dayjs(addDate)}
                   timezone="Asia/Manila"
                   showDaysOutsideCurrentMonth={true}
