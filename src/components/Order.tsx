@@ -72,8 +72,13 @@ const Order = () => {
   const [customerSearch, setCustomerSearch] = useState<string>("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>();
 
-  const [currDate, setCurrDate] = useState(dayjs().startOf("d").toISOString());
-  const [addDate, setAddDate] = useState<string>(dayjs().toISOString());
+  const [currDate, setCurrDate] = useState(
+    dayjs.utc().tz("Asia/Manila").startOf("d").toISOString(),
+  );
+
+  const [addDate, setAddDate] = useState<string>(
+    dayjs.utc().tz("Asia/Manila").toISOString(),
+  );
 
   const [itemUid, setItemUid] = useState<string>("");
   const [itemPrice, setItemPrice] = useState<string>("");
@@ -130,7 +135,7 @@ const Order = () => {
       const previousOrders = utils.order.getAllOrders.getData();
 
       utils.order.getAllOrders.setData(
-        { date: dayjs(currDate).toISOString() },
+        { date: dayjs.utc(currDate).tz("Asia/Manila").toISOString() },
         (old) =>
           old?.map((order) =>
             order.order_uid === updatedOrder.order_uid
@@ -144,7 +149,7 @@ const Order = () => {
 
     onError: (err, updatedOrder, context) => {
       utils.order.getAllOrders.setData(
-        { date: dayjs(currDate).toISOString() },
+        { date: dayjs.utc(currDate).tz("Asia/Manila").toISOString() },
         context?.previousOrders,
       );
     },
@@ -161,7 +166,7 @@ const Order = () => {
       const previousOrders = utils.order.getAllOrders.getData();
 
       utils.order.getAllOrders.setData(
-        { date: dayjs(currDate).toISOString() },
+        { date: dayjs.utc(currDate).tz("Asia/Manila").toISOString() },
         (old) =>
           old?.map((order) =>
             order.order_uid === updatedOrder.order_uid
@@ -175,7 +180,7 @@ const Order = () => {
 
     onError: (err, updatedOrder, context) => {
       utils.order.getAllOrders.setData(
-        { date: dayjs(currDate).toISOString() },
+        { date: dayjs.utc(currDate).tz("Asia/Manila").toISOString() },
         context?.previousOrders,
       );
     },
@@ -192,7 +197,7 @@ const Order = () => {
   });
 
   const clearStates = () => {
-    setAddDate(dayjs().toISOString());
+    setAddDate(dayjs.utc().tz("Asia/Manila").toISOString());
     setSelectedCustomer(undefined);
     setItemOrders([]);
     setPaymentMode("Cash");
@@ -221,7 +226,7 @@ const Order = () => {
     });
 
     setOrderUid(order.order_uid);
-    setAddDate(dayjs(order.date).toISOString());
+    setAddDate(dayjs.utc(order.date).tz("Asia/Manila").toISOString());
 
     if (user) {
       setCustomerUid(user.user_uid);
@@ -266,12 +271,16 @@ const Order = () => {
     }
 
     if (addOrderStep === 4 && isAddingOrder) {
-      setCurrDate(dayjs(addDate).startOf("d").toISOString());
+      setCurrDate(
+        dayjs.utc(addDate).tz("Asia/Manila").startOf("d").toISOString(),
+      );
       addOrder();
     }
 
     if (addOrderStep === 4 && !isAddingOrder) {
-      setCurrDate(dayjs(addDate).startOf("d").toISOString());
+      setCurrDate(
+        dayjs.utc(addDate).tz("Asia/Manila").startOf("d").toISOString(),
+      );
       editOrder();
     }
 
@@ -501,7 +510,13 @@ const Order = () => {
           <button
             className="btn btn-circle h-8 min-h-0 w-8 bg-[#eaecef] sm:h-12 sm:min-h-0 sm:w-12"
             onClick={() => {
-              setCurrDate(dayjs(currDate).add(-1, "d").toISOString());
+              setCurrDate(
+                dayjs
+                  .utc(currDate)
+                  .tz("Asia/Manila")
+                  .add(-1, "d")
+                  .toISOString(),
+              );
             }}
           >
             <FaChevronLeft className="h-3 sm:h-5" color={"#4c4528"} />
@@ -531,16 +546,22 @@ const Order = () => {
               },
             }}
             // disableOpenPicker={true}
-            value={dayjs(currDate)}
+            value={dayjs.utc(currDate).tz("Asia/Manila").startOf("d")}
             onAccept={(value: Dayjs | null) => {
-              const date = value!.startOf("d").toISOString();
+              const date = dayjs
+                .utc(value)
+                .tz("Asia/Manila")
+                .startOf("d")
+                .toISOString();
               setCurrDate(date);
             }}
           />
           <button
             className="btn btn-circle h-8 min-h-0 w-8 bg-[#eaecef] sm:h-12 sm:min-h-0 sm:w-12"
             onClick={() => {
-              setCurrDate(dayjs(currDate).add(1, "d").toISOString());
+              setCurrDate(
+                dayjs.utc(currDate).tz("Asia/Manila").add(1, "d").toISOString(),
+              );
             }}
           >
             <FaChevronRight className="h-3 sm:h-5" color={"#4c4528"} />
@@ -768,7 +789,8 @@ const Order = () => {
                 </p> */}
                 <input
                   type="text"
-                  value={dayjs(addDate)
+                  value={dayjs
+                    .utc(addDate)
                     .tz("Asia/Manila")
                     .format("MMMM DD, YYYY h:mm A")}
                   placeholder="You can't touch this"
@@ -811,7 +833,9 @@ const Order = () => {
                   onChange={(value: Dayjs | null) => {
                     if (value) {
                       value?.isValid()
-                        ? setAddDate(value.toDate().toISOString())
+                        ? setAddDate(
+                            dayjs.utc(value).tz("Asia/Manila").toISOString(),
+                          )
                         : setAddDate("");
                     } else {
                       setAddDate("");
